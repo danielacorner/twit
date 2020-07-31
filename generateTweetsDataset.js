@@ -24,6 +24,7 @@ function generateNewTweetsDataset({ numTweets, filePath }) {
 function onDeleted(err, filePath, numTweets) {
   if (err) console.log(err); // if no file found, keep going
 
+  console.log(`opening file ${filePath}`);
   fs.open(filePath, "w", (err, fileDirNum) =>
     onOpened(err, fileDirNum, numTweets)
   );
@@ -31,7 +32,6 @@ function onDeleted(err, filePath, numTweets) {
 
 // once deleted, open "./tweets.json" file
 function onOpened(err, fileDirNum, numTweets) {
-  console.log(`opening file`);
   if (err) throw err;
 
   stream.on("tweet", (tweet) => onReceiveTweet(tweet, fileDirNum, numTweets));

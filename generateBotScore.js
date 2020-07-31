@@ -8,7 +8,8 @@ const fs = require("fs");
 // https://github.com/ttezel/twit
 const T = new Twit(config);
 
-generateBotScore({ /* id: "888047946876542976",  */ name: "danielacorner" }); // * use id_str not id from tweet's user data
+// usage:
+// generateBotScore({ /* id: "888047946876542976",  */ name: "danielacorner" }); // * use id_str not id from tweet's user data
 
 // Twitter API reference https://developer.twitter.com/en/docs/api-reference-index
 
