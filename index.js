@@ -20,7 +20,7 @@ let bytes = 0;
 
 const NUM_TWEETS = 100;
 
-// delete the file
+// delete "./tweets.json" file
 fs.unlink(FILE_PATH, onDeleted);
 
 function onDeleted(err) {
@@ -30,6 +30,7 @@ function onDeleted(err) {
   fs.open("./tweets.json", "w", onOpened);
 }
 
+// once deleted, open "./tweets.json" file
 function onOpened(err, fileDirNum) {
   console.log(`opening ${FILE_PATH}`);
   if (err) throw err;
@@ -37,18 +38,16 @@ function onOpened(err, fileDirNum) {
   stream.on("tweet", (tweet) => onReceiveTweet(tweet, fileDirNum));
 }
 
+// when we receive a tweet from the stream,
+//
 function onReceiveTweet(tweet, fileDirNum) {
+  // increment the count
   count++;
 
-  // stop after a timeout
-  // setTimeout(endStream, 5 * 1000);
-
-  // when we see a tweet, save it in an array in "tweets.json"
-  // by adding to the end of the array
-  // console.log(tweet);
-
+  // stringify tweet
   const string = JSON.stringify(tweet);
 
+  // format tweets as an array
   const tweetWithBracket =
     count === 1
       ? `[${string},`
@@ -56,10 +55,11 @@ function onReceiveTweet(tweet, fileDirNum) {
       ? `${string},`
       : `${string}]`;
 
+  // save to "./tweets.json"
   // https://nodejs.org/api/fs.html#fs_fs_writefile_file_data_options_callback
   fs.write(fileDirNum, tweetWithBracket, null, "utf8", onWriteToFile);
 
-  // increment the count, and stop eventually
+  // stop eventually
   if (count === NUM_TWEETS) {
     endStream(fileDirNum);
   }
