@@ -1,9 +1,10 @@
 module.exports = generateNewTweetsDataset;
 
 const fs = require("fs");
-// https://github.com/ttezel/twit
+const { config } = require("./config");
+
 const Twit = require("twit");
-const config = require("./config");
+// https://github.com/ttezel/twit
 const T = new Twit(config);
 
 // stream -> receive continuously
