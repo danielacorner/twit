@@ -1,18 +1,18 @@
-console.log("The bot is starting");
+console.log("The bot is starting 👋");
 const fs = require("fs");
-
 // https://github.com/ttezel/twit
 const Twit = require("twit");
-
 const config = require("./config");
-const T = new Twit(config);
+
 const FILE_PATH = "./tweets.json";
+
+const T = new Twit(config);
 
 // get -> search by hashtag, location, user...
 
 // post -> tweet
 
-// stream
+// stream -> receive continuously
 const stream = T.stream("statuses/sample");
 
 let count = 0;
@@ -25,7 +25,7 @@ fs.unlink(FILE_PATH, onDeleted);
 
 function onDeleted(err) {
   console.log(`deleting ${FILE_PATH}`);
-  if (err) throw err;
+  if (err) console.log(err); // if no file found, keep going
 
   fs.open("./tweets.json", "w", onOpened);
 }
@@ -66,7 +66,8 @@ function onReceiveTweet(tweet, fileDirNum) {
 }
 
 function onWriteToFile(err, written, string) {
-  console.log("🌟🚨: kb written:", bytes / 1024);
+  bytes = bytes + written;
+  console.log("🤖: Mb written:", (bytes / 1024 / 1024).toFixed(1));
   if (err) throw err;
 }
 
