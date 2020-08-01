@@ -8,8 +8,6 @@ const NUM_TWEETS = Number(process.argv[3]) || 10;
 console.log("🌟🚨: NUM_TWEETS", NUM_TWEETS);
 console.log("🌟🚨: FILE_PATH", FILE_PATH);
 
-console.log(process.argv);
-
 generateNewTweetsDataset({ numTweets: NUM_TWEETS, filePath: FILE_PATH });
 
 // TODO: for each tweet in the dataset, append a bot score

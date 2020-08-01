@@ -84,7 +84,8 @@ function onReceiveTimeline(err, data, response, { id, name }) {
 
   // Botometer
   // * requires both user id and name
-  requestBotometerScore({ id, name }, data);
+  // TODO
+  // requestBotometerScore({ id, name }, data);
 }
 
 function requestBotometerScore({ id, name }, data) {

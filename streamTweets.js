@@ -14,7 +14,7 @@ const T = new Twit(config);
 async function streamTweets({ numTweets, filterFn }) {
   return new Promise((resolve, reject) => {
     //
-    const stream = T.stream("statuses/sample");
+    const stream = T.stream(`statuses/sample`);
     let count = 0;
     const tweets = [];
     console.log("Streaming tweets 🐦");
