@@ -64,9 +64,14 @@ function onReceiveTweet(tweet, fileDirNum, numTweets) {
   }
 }
 
+let prevMb = 0;
 function onWriteToFile(err, written, string) {
   bytes = bytes + written;
-  console.log("🤖: Mb written:", (bytes / 1024 / 1024).toFixed(1));
+  const mb = (bytes / 1024 / 1024).toFixed(1);
+  if (prevMb !== mb) {
+    console.log("🤖: Mb written:", mb);
+    prevMb = mb;
+  }
   if (err) throw err;
 }
 
