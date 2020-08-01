@@ -27,8 +27,8 @@ async function streamTweets({ numTweets, filterFn }) {
 
       // increment the count
       count++;
-      if (count % 10 === 0) {
-        console.log(`fetched ${count} tweets`);
+      if (count % (filterFn ? 1 : 10) === 0) {
+        console.log(`tweets fetched: ${count}`);
       }
 
       // generate sentiment analysis

@@ -12,8 +12,9 @@ app.get("/", function (req, res) {
 
 app.get("/api/stream", async function (req, res) {
   const filterLevel = req.query.filterLevel;
-  const filterBy = req.query.filterBy;
-  const filterFn = getFilterFn(filterBy, filterLevel);
+  const mediaType = req.query.mediaType;
+  const countryCode = req.query.countryCode;
+  const filterFn = getFilterFn(mediaType, filterLevel, countryCode);
   const tweets = await streamTweets({
     numTweets: +req.query.num,
     filterFn,
@@ -38,42 +39,28 @@ const FILTER_LEVEL = {
 
 // tweet object
 // https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object
-function getFilterFn(filterBy, filterLevel) {
-  switch (filterBy) {
+function getFilterFn(mediaType, filterLevel, countryCode) {
+  return (node) =>
+    filterByMediaType(node, mediaType, filterLevel) &&
+    filterByQualityLevel(node, filterLevel) &&
+    filterByLocation(node, countryCode);
+}
+
+function filterByMediaType(node, mediaType, filterLevel) {
+  const first = getMediaArr(node)[0];
+  switch (mediaType) {
     case FILTER_BY.imageAndVideo:
-      return (node) => {
-        const first = getMediaArr(node)[0];
-        return (
-          first &&
-          first.type &&
-          ["photo", "video"].includes(first.type) &&
-          filterNodeByLevel(node, filterLevel)
-        );
-      };
+      return first && first.type && ["photo", "video"].includes(first.type);
     case FILTER_BY.imageOnly:
-      return (node) => {
-        const first = getMediaArr(node)[0];
-        return (
-          first &&
-          first.type === "photo" &&
-          filterNodeByLevel(node, filterLevel)
-        );
-      };
+      return first && first.type === "photo";
     case FILTER_BY.videoOnly:
-      return (node) => {
-        const first = getMediaArr(node)[0];
-        return (
-          first &&
-          first.type === "video" &&
-          filterNodeByLevel(node, filterLevel)
-        );
-      };
+      return first && first.type === "video";
     default:
-      break;
+      return true;
   }
 }
 
-function filterNodeByLevel(node, filterLevel) {
+function filterByQualityLevel(node, filterLevel) {
   switch (filterLevel) {
     case FILTER_LEVEL.none:
       return true;
@@ -86,4 +73,10 @@ function filterNodeByLevel(node, filterLevel) {
     default:
       return true;
   }
+}
+
+function filterByLocation(node, countryCode) {
+  console.log("🌟🚨: filterByLocation -> countryCode", countryCode);
+  console.log("🌟🚨: filterByLocation -> node.country_code", node.country_code);
+  return !countryCode || node.country_code === countryCode;
 }

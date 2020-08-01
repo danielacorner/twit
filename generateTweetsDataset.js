@@ -1,4 +1,6 @@
 module.exports = generateNewTweetsDataset;
+const Sentiment = require("sentiment");
+const sentiment = new Sentiment();
 
 const fs = require("fs");
 const { config } = require("./config");
@@ -43,8 +45,10 @@ function onReceiveTweet(tweet, fileDirNum, numTweets) {
   // increment the count
   count++;
 
+  const sentimentResult = sentiment.analyze(tweet.text);
+
   // stringify tweet
-  const string = JSON.stringify(tweet);
+  const string = JSON.stringify({ ...tweet, sentimentResult });
 
   // format tweets as an array
   const tweetWithBracket =
