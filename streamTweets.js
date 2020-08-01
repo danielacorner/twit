@@ -7,11 +7,11 @@ const Twit = require("twit");
 const T = new Twit(config);
 
 // stream -> receive continuously
-const stream = T.stream("statuses/sample");
 
 async function streamTweets({ numTweets }) {
-  let count = 0;
   return new Promise((resolve, reject) => {
+    const stream = T.stream("statuses/sample");
+    let count = 0;
     const tweets = [];
     console.log("Streaming tweets 🐦");
     // delete "./tweets.json" file

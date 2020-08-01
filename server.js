@@ -10,7 +10,7 @@ app.get("/", function (req, res) {
 });
 
 app.get("/api/stream", async function (req, res) {
-  const tweets = await streamTweets({ numTweets: 100 });
+  const tweets = await streamTweets({ numTweets: +req.query.num });
   res.json(tweets);
 });
 
