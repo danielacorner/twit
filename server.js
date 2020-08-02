@@ -14,7 +14,8 @@ app.get("/api/stream", async function (req, res) {
   const filterLevel = req.query.filterLevel;
   const mediaType = req.query.mediaType;
   const countryCode = req.query.countryCode;
-  const filterFn = getFilterFn(mediaType, filterLevel, countryCode);
+  const lang = req.query.lang;
+  const filterFn = getFilterFn({ mediaType, filterLevel, countryCode, lang });
   const tweets = await streamTweets({
     numTweets: +req.query.num,
     filterFn,
@@ -39,11 +40,12 @@ const FILTER_LEVEL = {
 
 // tweet object
 // https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object
-function getFilterFn(mediaType, filterLevel, countryCode) {
+function getFilterFn({ mediaType, filterLevel, countryCode, lang }) {
   return (node) =>
     filterByMediaType(node, mediaType, filterLevel) &&
     filterByQualityLevel(node, filterLevel) &&
-    filterByLocation(node, countryCode);
+    filterByLocation(node, countryCode) &&
+    filterByLang(node, lang);
 }
 
 function filterByMediaType(node, mediaType, filterLevel) {
@@ -76,7 +78,9 @@ function filterByQualityLevel(node, filterLevel) {
 }
 
 function filterByLocation(node, countryCode) {
-  console.log("🌟🚨: filterByLocation -> countryCode", countryCode);
-  console.log("🌟🚨: filterByLocation -> node.country_code", node.country_code);
   return !countryCode || node.country_code === countryCode;
+}
+
+function filterByLang(node, lang) {
+  return !lang || node.lang === lang;
 }
