@@ -1,6 +1,4 @@
-module.exports = {
-  getMediaArr,
-};
+const Sentiment = require("sentiment");
 
 function getMediaArr(node) {
   return (
@@ -19,3 +17,18 @@ function getMediaArr(node) {
     []
   );
 }
+
+// https://www.npmjs.com/package/sentiment#api-reference
+const sentiment = new Sentiment();
+
+const { config } = require("./config");
+
+const Twit = require("twit");
+// https://github.com/ttezel/twit
+const T = new Twit(config);
+
+module.exports = {
+  getMediaArr,
+  sentiment,
+  T,
+};

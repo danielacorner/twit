@@ -1,13 +1,7 @@
 module.exports = generateNewTweetsDataset;
-const Sentiment = require("sentiment");
-const sentiment = new Sentiment();
+const { T, sentiment } = require("./utils");
 
 const fs = require("fs");
-const { config } = require("./config");
-
-const Twit = require("twit");
-// https://github.com/ttezel/twit
-const T = new Twit(config);
 
 // stream -> receive continuously
 const stream = T.stream("statuses/sample");

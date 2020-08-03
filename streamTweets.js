@@ -1,13 +1,5 @@
 module.exports = streamTweets;
-// https://www.npmjs.com/package/sentiment#api-reference
-const Sentiment = require("sentiment");
-const sentiment = new Sentiment();
-
-const { config } = require("./config");
-
-const Twit = require("twit");
-// https://github.com/ttezel/twit
-const T = new Twit(config);
+const { T, sentiment } = require("./utils");
 
 // stream -> receive continuously
 

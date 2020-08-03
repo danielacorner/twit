@@ -3,6 +3,7 @@ const app = express();
 const path = require("path");
 const streamTweets = require("./streamTweets");
 const { getMediaArr } = require("./utils");
+const getTimeline = require("./getTimeline");
 
 app.use(express.static(`main`));
 
@@ -24,6 +25,15 @@ app.get("/api/stream", async function (req, res) {
   res.json(tweets);
 });
 
+app.get("/api/user_timeline", async function (req, res) {
+  const id_str = req.query.id_str;
+  const tweets = await getTimeline({
+    numTweets: 50,
+    userId: id_str,
+  });
+  res.json(tweets);
+});
+
 app.listen(process.env.PORT || 8080);
 
 const FILTER_BY = {
@@ -35,7 +45,6 @@ const FILTER_LEVEL = {
   none: "none",
   low: "low",
   medium: "medium",
-  // high: "high",
 };
 
 // tweet object
