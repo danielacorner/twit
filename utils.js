@@ -27,8 +27,36 @@ const Twit = require("twit");
 // https://github.com/ttezel/twit
 const T = new Twit(config);
 
+const FILTER_BY = {
+  imageAndVideo: "imageAndVideo",
+  imageOnly: "imageOnly",
+  videoOnly: "videoOnly",
+};
+const FILTER_LEVEL = {
+  none: "none",
+  low: "low",
+  medium: "medium",
+};
+
+function filterByMediaType(node, mediaType, filterLevel) {
+  const first = getMediaArr(node)[0];
+  switch (mediaType) {
+    case FILTER_BY.imageAndVideo:
+      return first && first.type && ["photo", "video"].includes(first.type);
+    case FILTER_BY.imageOnly:
+      return first && first.type === "photo";
+    case FILTER_BY.videoOnly:
+      return first && first.type === "video";
+    default:
+      return true;
+  }
+}
+
 module.exports = {
   getMediaArr,
   sentiment,
   T,
+  FILTER_BY,
+  FILTER_LEVEL,
+  filterByMediaType,
 };

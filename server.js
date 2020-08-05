@@ -2,8 +2,9 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const streamTweets = require("./streamTweets");
-const { getMediaArr } = require("./utils");
+const { FILTER_LEVEL, filterByMediaType } = require("./utils");
 const getTimeline = require("./getTimeline");
+const getSearchResults = require("./getSearchResults");
 
 app.use(express.static(`main`));
 
@@ -27,25 +28,29 @@ app.get("/api/stream", async function (req, res) {
 
 app.get("/api/user_timeline", async function (req, res) {
   const id_str = req.query.id_str;
+  const numTweets = req.query.num;
   const tweets = await getTimeline({
-    numTweets: 50,
+    numTweets,
     userId: id_str,
   });
   res.json(tweets);
 });
 
-app.listen(process.env.PORT || 8080);
+app.get("/api/search", async function (req, res) {
+  const term = req.query.term;
+  const numTweets = req.query.num;
+  const lang = req.query.lang;
+  const mediaType = req.query.mediaType;
+  const tweets = await getSearchResults({
+    numTweets,
+    term,
+    lang,
+    mediaType,
+  });
+  res.json(tweets && tweets.data.statuses);
+});
 
-const FILTER_BY = {
-  imageAndVideo: "imageAndVideo",
-  imageOnly: "imageOnly",
-  videoOnly: "videoOnly",
-};
-const FILTER_LEVEL = {
-  none: "none",
-  low: "low",
-  medium: "medium",
-};
+app.listen(process.env.PORT || 8080);
 
 // tweet object
 // https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object
@@ -55,20 +60,6 @@ function getFilterFn({ mediaType, filterLevel, countryCode, lang }) {
     filterByQualityLevel(node, filterLevel) &&
     filterByLocation(node, countryCode) &&
     filterByLang(node, lang);
-}
-
-function filterByMediaType(node, mediaType, filterLevel) {
-  const first = getMediaArr(node)[0];
-  switch (mediaType) {
-    case FILTER_BY.imageAndVideo:
-      return first && first.type && ["photo", "video"].includes(first.type);
-    case FILTER_BY.imageOnly:
-      return first && first.type === "photo";
-    case FILTER_BY.videoOnly:
-      return first && first.type === "video";
-    default:
-      return true;
-  }
 }
 
 function filterByQualityLevel(node, filterLevel) {

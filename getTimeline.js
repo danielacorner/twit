@@ -10,6 +10,5 @@ async function getTimeline({ userId, numTweets }) {
     include_rts: true,
     exclude_replies: false,
   });
-  console.log("🌟🚨: getTimeline -> result", result);
   return result;
 }
