@@ -6,7 +6,7 @@ function getMediaArr(node) {
       node.extended_entities.media.map((media) => ({
         ...media,
         src:
-          media.type === "video"
+          media && media.type === "video"
             ? media.video_info &&
               media.video_info.variants.find(
                 ({ content_type }) => content_type === "video/mp4"
