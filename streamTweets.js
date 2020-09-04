@@ -25,7 +25,9 @@ async function streamTweets({ numTweets, filterFn }) {
 
       // generate sentiment analysis
       // ? if too slow, move this to a separate batch request
-      const sentimentResult = sentiment.analyze(tweet.text);
+      const sentimentResult = sentiment.analyze(
+        (tweet.extended_tweet || tweet).full_text
+      );
 
       tweets.push({ ...tweet, sentimentResult });
 

@@ -1,48 +1,48 @@
-module.exports = generateNewTweetsDataset;
-const { T, sentiment } = require("./utils");
+module.exports = { generateNewTweetsDataset, addSentimentToTweet };
+const { stream, sentiment } = require("./utils");
 
 const fs = require("fs");
-
-// stream -> receive continuously
-const stream = T.stream("statuses/sample");
 
 let count = 0;
 let bytes = 0;
 
 function generateNewTweetsDataset({ numTweets, filePath }) {
   console.log("The bot is starting 👋");
-  // delete "./tweets.json" file
   console.log(`deleting file`);
 
-  fs.unlink(filePath, (err) => onDeleted(err, filePath, numTweets));
+  // delete "./tweets.json" file
+  fs.unlink(filePath, (err) => openFile(err, filePath, numTweets));
 }
 
-function onDeleted(err, filePath, numTweets) {
+// once deleted, open "./tweets.json" file
+function openFile(err, filePath, numTweets) {
   if (err) console.log(err); // if no file found, keep going
 
   console.log(`opening file ${filePath}`);
   fs.open(filePath, "w", (err, fileDirNum) =>
-    onOpened(err, fileDirNum, numTweets)
+    streamTweets(err, fileDirNum, numTweets)
   );
 }
 
-// once deleted, open "./tweets.json" file
-function onOpened(err, fileDirNum, numTweets) {
+// then stream tweets
+function streamTweets(err, fileDirNum, numTweets) {
   if (err) throw err;
 
-  stream.on("tweet", (tweet) => onReceiveTweet(tweet, fileDirNum, numTweets));
+  stream.on("tweet", (tweet) =>
+    writeTweetOnReceive(tweet, fileDirNum, numTweets)
+  );
 }
 
 // when we receive a tweet from the stream,
-//
-function onReceiveTweet(tweet, fileDirNum, numTweets) {
+// add some data and write it to the file
+function writeTweetOnReceive(tweet, fileDirNum, numTweets) {
   // increment the count
   count++;
 
-  const sentimentResult = sentiment.analyze(tweet.text);
+  const tweetWithSentiment = addSentimentToTweet(tweet);
 
   // stringify tweet
-  const string = JSON.stringify({ ...tweet, sentimentResult });
+  const string = JSON.stringify(tweetWithSentiment);
 
   // format tweets as an array
   const tweetWithBracket =
@@ -60,6 +60,14 @@ function onReceiveTweet(tweet, fileDirNum, numTweets) {
   if (count === numTweets) {
     endStream(fileDirNum);
   }
+}
+
+function addSentimentToTweet(tweet) {
+  const sentimentResult = sentiment.analyze(
+    (tweet.extended_tweet || tweet).full_text
+  );
+
+  return { ...tweet, sentimentResult };
 }
 
 let prevMb = 0;

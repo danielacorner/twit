@@ -1,6 +1,6 @@
 // usage: `node index.js "../src/tweets.json" 100` - generate 100 tweets in ../tweets.json
 
-const generateNewTweetsDataset = require("./generateTweetsDataset");
+const { generateNewTweetsDataset } = require("./generateTweetsDataset");
 const generateBotScore = require("./generateBotScore");
 
 const FILE_PATH = process.argv[2] || "./tweets.json";

@@ -5,6 +5,7 @@ const streamTweets = require("./streamTweets");
 const { FILTER_LEVEL, filterByMediaType } = require("./utils");
 const getTimeline = require("./getTimeline");
 const getSearchResults = require("./getSearchResults");
+const getUserInfo = require("./getUserInfo");
 
 app.use(express.static(`main`));
 
@@ -34,6 +35,16 @@ app.get("/api/user_timeline", async function (req, res) {
     userId: id_str,
   });
   res.json(tweets);
+});
+
+app.get("/api/user_info", async function (req, res) {
+  const id_str = req.query.id_str;
+  const screenName = req.query.screen_name;
+  const userInfo = await getUserInfo({
+    userId: id_str,
+    screenName,
+  });
+  res.json(userInfo);
 });
 
 app.get("/api/search", async function (req, res) {

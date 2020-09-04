@@ -52,10 +52,14 @@ function filterByMediaType(node, mediaType, filterLevel) {
   }
 }
 
+// stream -> receive continuously
+const stream = T.stream("statuses/sample");
+
 module.exports = {
   getMediaArr,
   sentiment,
   T,
+  stream,
   FILTER_BY,
   FILTER_LEVEL,
   filterByMediaType,
