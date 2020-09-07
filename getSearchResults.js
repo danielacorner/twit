@@ -1,5 +1,5 @@
 module.exports = getSearchResults;
-const { T, sentiment, FILTER_BY, getMediaArr } = require("./utils");
+const { T, getMediaArr } = require("./utils");
 
 function sleep(ms) {
   return new Promise((resolve) => {
@@ -8,7 +8,6 @@ function sleep(ms) {
 }
 // https://developer.twitter.com/en/docs/tweets/search/api-reference/get-search-tweets
 async function getSearchResults({ term, numTweets, lang, mediaType }) {
-  // https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline
   console.log("fetching search results 🐦");
   const result = await T.get(`search/tweets`, {
     q: term,

@@ -13,6 +13,7 @@ app.get("/", function (req, res) {
   res.sendFile(path.join(__dirname, "../build", "index.html"));
 });
 
+// https://developer.twitter.com/en/docs/twitter-api/v1/tweets/sample-realtime/overview/get_statuses_sample
 app.get("/api/stream", async function (req, res) {
   const filterLevel = req.query.filterLevel;
   const mediaType = req.query.mediaType;
@@ -27,18 +28,22 @@ app.get("/api/stream", async function (req, res) {
   res.json(tweets);
 });
 
+// https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline
 app.get("/api/user_timeline", async function (req, res) {
   const id_str = req.query.id_str;
   const screen_name = req.query.screen_name;
   const numTweets = req.query.num;
+  const mediaType = req.query.mediaType;
   const tweets = await getTimeline({
     numTweets,
+    mediaType,
     userId: id_str,
     screenName: screen_name,
   });
   res.json(tweets);
 });
 
+// https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline
 app.get("/api/user_info", async function (req, res) {
   const id_str = req.query.id_str;
   const screenName = req.query.screen_name;
@@ -49,6 +54,7 @@ app.get("/api/user_info", async function (req, res) {
   res.json(userInfo);
 });
 
+// https://developer.twitter.com/en/docs/tweets/search/api-reference/get-search-tweets
 app.get("/api/search", async function (req, res) {
   const term = req.query.term;
   const numTweets = req.query.num;

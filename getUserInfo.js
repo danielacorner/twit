@@ -1,6 +1,7 @@
 module.exports = getUserInfo;
-const { T, sentiment } = require("./utils");
+const { T } = require("./utils");
 
+// https://www.npmjs.com/package/twit
 async function getUserInfo({ userId, screenName }) {
   // https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline
   console.log("fetching timeline tweets 🐦");

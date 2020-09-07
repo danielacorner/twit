@@ -38,7 +38,7 @@ const FILTER_LEVEL = {
   medium: "medium",
 };
 
-function filterByMediaType(node, mediaType, filterLevel) {
+function filterByMediaType(node, mediaType) {
   const first = getMediaArr(node)[0];
   switch (mediaType) {
     case FILTER_BY.imageAndVideo:
