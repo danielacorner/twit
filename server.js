@@ -29,10 +29,12 @@ app.get("/api/stream", async function (req, res) {
 
 app.get("/api/user_timeline", async function (req, res) {
   const id_str = req.query.id_str;
+  const screen_name = req.query.screen_name;
   const numTweets = req.query.num;
   const tweets = await getTimeline({
     numTweets,
     userId: id_str,
+    screenName: screen_name,
   });
   res.json(tweets);
 });
