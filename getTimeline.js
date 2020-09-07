@@ -1,10 +1,10 @@
 module.exports = getTimeline;
-const { T, filterByMediaType } = require("./utils");
+const { T } = require("./utils");
 
 const MAX_ATTEMPTS = 10;
 
-async function getTimeline({ userId, numTweets, screenName, mediaType }) {
-  // https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline
+/** https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline */
+async function getTimeline({ userId, numTweets, screenName, filterFn }) {
   console.log("fetching timeline tweets 🐦");
 
   // if filtering by mediaType, keep fetching until we get that many
@@ -35,10 +35,7 @@ async function getTimeline({ userId, numTweets, screenName, mediaType }) {
     // on the next attempt, fetch tweets older than the oldest one we just fetched
     since_id = result.data.slice(-1)[0].id;
 
-    fetchedTweets = [
-      ...fetchedTweets,
-      ...result.data.filter((node) => filterByMediaType(node, mediaType)),
-    ];
+    fetchedTweets = [...fetchedTweets, ...result.data.filter(filterFn)];
   }
 
   return fetchedTweets.slice(0, numTweets);

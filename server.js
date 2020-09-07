@@ -6,6 +6,7 @@ const { FILTER_LEVEL, filterByMediaType } = require("./utils");
 const getTimeline = require("./getTimeline");
 const getSearchResults = require("./getSearchResults");
 const getUserInfo = require("./getUserInfo");
+const streamFilteredTweets = require("./streamFilteredTweets");
 
 app.use(express.static(`main`));
 
@@ -20,10 +21,26 @@ app.get("/api/stream", async function (req, res) {
   const countryCode = req.query.countryCode;
   const lang = req.query.lang;
   const filterFn = getFilterFn({ mediaType, filterLevel, countryCode, lang });
+
   const tweets = await streamTweets({
     numTweets: +req.query.num,
     filterFn,
     filterLevel,
+  });
+  res.json(tweets);
+});
+
+// https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/api-reference/post-statuses-filter
+app.get("/api/filter", async function (req, res) {
+  const locations = req.query.locations;
+  console.log("🌟🚨: locations", locations);
+  const mediaType = req.query.mediaType;
+  const filterFn = getFilterFn({ mediaType });
+
+  const tweets = await streamFilteredTweets({
+    numTweets: +req.query.num,
+    filterFn,
+    locations,
   });
   res.json(tweets);
 });
@@ -34,9 +51,11 @@ app.get("/api/user_timeline", async function (req, res) {
   const screen_name = req.query.screen_name;
   const numTweets = req.query.num;
   const mediaType = req.query.mediaType;
+  const filterFn = getFilterFn({ mediaType });
+
   const tweets = await getTimeline({
     numTweets,
-    mediaType,
+    filterFn,
     userId: id_str,
     screenName: screen_name,
   });
