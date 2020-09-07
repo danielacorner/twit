@@ -1,5 +1,5 @@
 module.exports = getSearchResults;
-const { T, getMediaArr } = require("./utils");
+const { T, getMediaArr, filterByMediaType } = require("./utils");
 
 function sleep(ms) {
   return new Promise((resolve) => {
@@ -7,12 +7,23 @@ function sleep(ms) {
   });
 }
 // https://developer.twitter.com/en/docs/tweets/search/api-reference/get-search-tweets
-async function getSearchResults({ term, numTweets, lang, mediaType }) {
+// https://developer.twitter.com/en/docs/twitter-api/v1/rules-and-filtering/overview/standard-operators
+// https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/api-reference/get-search-tweets
+async function getSearchResults({
+  term,
+  numTweets,
+  lang,
+  mediaType,
+  geocode,
+  result_type,
+}) {
   console.log("fetching search results 🐦");
   const result = await T.get(`search/tweets`, {
     q: term,
     count: numTweets,
     ...(lang ? { lang } : {}),
+    ...(geocode ? { geocode } : {}),
+    result_type,
   });
 
   const statusesWithMedia = result.data.statuses.filter(

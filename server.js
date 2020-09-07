@@ -33,7 +33,6 @@ app.get("/api/stream", async function (req, res) {
 // https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/api-reference/post-statuses-filter
 app.get("/api/filter", async function (req, res) {
   const locations = req.query.locations;
-  console.log("🌟🚨: locations", locations);
   const mediaType = req.query.mediaType;
   const filterFn = getFilterFn({ mediaType });
 
@@ -79,11 +78,15 @@ app.get("/api/search", async function (req, res) {
   const numTweets = req.query.num;
   const lang = req.query.lang;
   const mediaType = req.query.mediaType;
+  const result_type = req.query.result_type;
+  const geocode = req.query.geocode;
   const tweets = await getSearchResults({
     numTweets,
     term,
     lang,
     mediaType,
+    result_type,
+    geocode,
   });
   res.json(tweets && tweets.data.statuses);
 });

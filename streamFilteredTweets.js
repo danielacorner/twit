@@ -25,13 +25,8 @@ async function streamFilteredTweets({ numTweets, filterFn, locations }) {
     // if filtering by mediaType, keep fetching until we get that many
 
     stream.on("tweet", (tweet) => {
-      console.log("🌟🚨: streamFilteredTweets -> tweet", tweet);
       // if the tweet isn't filtered out...
       if (filterFn && !filterFn(tweet)) {
-        console.log(
-          "🌟🚨: streamFilteredTweets -> !filterFn(tweet)",
-          !filterFn(tweet)
-        );
         return;
       }
 
@@ -40,7 +35,7 @@ async function streamFilteredTweets({ numTweets, filterFn, locations }) {
 
       // console log every so often
       if (count % (filterFn ? 1 : 10) === 0) {
-        console.log(`tweets fetched: ${count}`);
+        console.log(`tweets fetched: ${count}, need: ${numTweets}`);
       }
 
       // generate sentiment analysis
