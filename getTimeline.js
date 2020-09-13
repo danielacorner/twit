@@ -1,5 +1,6 @@
 module.exports = getTimeline;
 const { T } = require("./utils");
+const { uniqBy } = require("lodash");
 
 const MAX_ATTEMPTS = 10;
 
@@ -35,7 +36,10 @@ async function getTimeline({ userId, numTweets, screenName, filterFn }) {
     // on the next attempt, fetch tweets older than the oldest one we just fetched
     since_id = result.data.slice(-1)[0].id;
 
-    fetchedTweets = [...fetchedTweets, ...result.data.filter(filterFn)];
+    fetchedTweets = uniqBy(
+      [...fetchedTweets, ...result.data.filter(filterFn)],
+      (t) => t.id_str
+    );
   }
 
   return fetchedTweets.slice(0, numTweets);

@@ -44,7 +44,6 @@ function generateBotScore({ id, name }) {
     id,
     name,
     callback: (err, data, response) => {
-      console.log("🌟🚨: generateBotScore -> data", data[0]);
       // getTimeline only requires id OR name,
       // but requestBotometerScore requires both
       // so populate whichever is missing using the data
@@ -102,8 +101,6 @@ function requestBotometerScore({ id, name }, data) {
     useQueryString: true,
   });
 
-  console.log("🌟🚨: requestBotometerScore -> id", id);
-  console.log("🌟🚨: requestBotometerScore -> name", name);
   req.type("json");
   req.send({
     user: { id, screen_name: name },
