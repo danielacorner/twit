@@ -90,15 +90,18 @@ app.get("/api/search", async function (req, res) {
   const mediaType = req.query.mediaType;
   const result_type = req.query.result_type;
   const geocode = req.query.geocode;
-  const tweets = await getSearchResults({
+  getSearchResults({
     numTweets,
     term,
     lang,
     mediaType,
     result_type,
     geocode,
-  });
-  res.json(tweets && tweets.data.statuses);
+  })
+    .then((tweets) => {
+      res.json(tweets && tweets.data.statuses);
+    })
+    .catch((err) => res.json(err));
 });
 
 app.listen(process.env.PORT || 8080);
