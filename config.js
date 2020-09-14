@@ -1,15 +1,13 @@
-require("dotenv").config();
-
 module.exports = {
   config: {
     // api key
-    consumer_key: process.env.TWITTER_API_KEY,
+    consumer_key: "V9ygdvJgstQpK2RDJ5ECNBZih",
     // api key secret
-    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+    consumer_secret: "mNVC0S4mco0NX0PWOoyIJYTe3lNSeGUa15Tna68itlchCm0DSx",
     // app_only_auth:true,
-    access_token: process.env.TWITTER_ACCESS_TOKEN,
-    access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
+    access_token: "3166664337-6R93zjS3ESvq9vRYvMlopTzYtRH06OrBkIItGee",
+    access_token_secret: "QHuFU5YG806CLTfXkdubh7lDSZgRLOCWvnd0r8qKdtz3Q",
   },
   // botometer key (not yet used)
-  rapidapi_key: process.env.BOTOMETER_RAPIDAPI_KEY,
+  rapidapi_key: "52a578c65amshd84c2c17a4a34e2p1c11d9jsnef00b770bb13",
 };

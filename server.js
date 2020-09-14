@@ -10,6 +10,15 @@ const streamFilteredTweets = require("./streamFilteredTweets");
 
 app.use(express.static(`main`));
 
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
+
 app.get("/", function (req, res) {
   res.sendFile(path.join(__dirname, "index.html"));
 });
@@ -27,6 +36,7 @@ app.get("/api/stream", async function (req, res) {
     filterFn,
     filterLevel,
   });
+
   res.json(tweets);
 });
 
