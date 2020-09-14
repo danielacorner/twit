@@ -1,6 +1,6 @@
 module.exports = getTimeline;
 const { T } = require("./utils");
-const { uniqBy } = require("lodash");
+const uniqBy = require("lodash.uniqby");
 
 const MAX_ATTEMPTS = 10;
 
