@@ -7,6 +7,7 @@ const getTimeline = require("./getTimeline");
 const getSearchResults = require("./getSearchResults");
 const getUserInfo = require("./getUserInfo");
 const streamFilteredTweets = require("./streamFilteredTweets");
+const getTweets = require("./getTweets");
 
 app.use(express.static(`main`));
 
@@ -36,6 +37,15 @@ app.get("/api/stream", async function (req, res) {
     filterFn,
     filterLevel,
   });
+
+  res.json(tweets);
+});
+
+app.get("/api/get", async function (req, res) {
+  console.log("🌟🚨: req.query.ids", req.query.ids);
+  const ids = req.query.ids.split(",");
+
+  const tweets = await getTweets(ids);
 
   res.json(tweets);
 });
