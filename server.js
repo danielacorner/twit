@@ -11,7 +11,7 @@ const streamFilteredTweets = require("./streamFilteredTweets");
 app.use(express.static(`main`));
 
 app.get("/", function (req, res) {
-  res.sendFile(path.join(__dirname, "../build", "index.html"));
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // https://developer.twitter.com/en/docs/twitter-api/v1/tweets/sample-realtime/overview/get_statuses_sample
