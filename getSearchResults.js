@@ -29,7 +29,10 @@ async function getSearchResults({
   const statusesWithMedia = result.data.statuses.filter(
     (node) => getMediaArr(node).length > 0
   );
-  console.log("🌟🚨: getSearchResults -> statuses", statusesWithMedia);
+  console.log(
+    "🌟🚨: getSearchResults -> statuses.length",
+    statusesWithMedia.length
+  );
 
   const resultsWithMedia = {
     ...result,
@@ -39,7 +42,11 @@ async function getSearchResults({
   if (!mediaType) {
     return result;
   } else {
-    while (statusesWithMedia.length < numTweets) {
+    while (resultsWithMedia.data.statuses.length < numTweets) {
+      console.log(
+        "🌟🚨: resultsWithMedia.data.statuses.length",
+        resultsWithMedia.data.statuses.length
+      );
       await sleep(1000);
       const nextResult = await T.get(`search/tweets`, {
         q: term,
