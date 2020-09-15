@@ -111,7 +111,10 @@ app.get("/api/search", async function (req, res) {
     .then((tweets) => {
       res.json(tweets && tweets.data.statuses);
     })
-    .catch((err) => res.json(err));
+    .catch((err) => {
+      console.error(err);
+      res.json(err);
+    });
 });
 
 app.listen(process.env.PORT || 8080);
