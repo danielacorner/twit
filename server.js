@@ -8,6 +8,7 @@ const getSearchResults = require("./getSearchResults");
 const getUserInfo = require("./getUserInfo");
 const streamFilteredTweets = require("./streamFilteredTweets");
 const getTweets = require("./getTweets");
+const getLikes = require("./getLikes");
 
 app.use(express.static(`main`));
 
@@ -73,6 +74,23 @@ app.get("/api/user_timeline", async function (req, res) {
   const filterFn = getFilterFn({ mediaType });
 
   const tweets = await getTimeline({
+    numTweets,
+    filterFn,
+    userId: id_str,
+    screenName: screen_name,
+  });
+  res.json(tweets);
+});
+
+// https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline
+app.get("/api/user_likes", async function (req, res) {
+  const id_str = req.query.id_str;
+  const screen_name = req.query.screen_name;
+  const numTweets = req.query.num;
+  const mediaType = req.query.mediaType;
+  const filterFn = getFilterFn({ mediaType });
+
+  const tweets = await getLikes({
     numTweets,
     filterFn,
     userId: id_str,
