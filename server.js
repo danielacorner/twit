@@ -71,6 +71,7 @@ app.get("/api/user_timeline", async function (req, res) {
   const screen_name = req.query.screen_name;
   const numTweets = req.query.num;
   const mediaType = req.query.mediaType;
+  const maxId = req.query.maxId || null;
   const filterFn = getFilterFn({ mediaType });
 
   const tweets = await getTimeline({
@@ -78,6 +79,7 @@ app.get("/api/user_timeline", async function (req, res) {
     filterFn,
     userId: id_str,
     screenName: screen_name,
+    maxId,
   });
   res.json(tweets);
 });

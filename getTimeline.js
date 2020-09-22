@@ -5,7 +5,7 @@ const uniqBy = require("lodash.uniqby");
 const MAX_ATTEMPTS = 10;
 
 /** https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline */
-async function getTimeline({ userId, numTweets, screenName, filterFn }) {
+async function getTimeline({ userId, numTweets, screenName, filterFn, maxId }) {
   console.log("fetching timeline tweets 🐦");
 
   // if filtering by mediaType, keep fetching until we get that many
@@ -15,7 +15,7 @@ async function getTimeline({ userId, numTweets, screenName, filterFn }) {
 
   let attempts = 0;
   let fetchedTweets = [];
-  let since_id = null;
+  let max_id = maxId || null;
 
   while (fetchedTweets.length < numTweets && attempts < MAX_ATTEMPTS) {
     attempts++;
@@ -23,7 +23,7 @@ async function getTimeline({ userId, numTweets, screenName, filterFn }) {
     const result = await T.get(`statuses/user_timeline`, {
       ...(userId ? { user_id: userId } : {}),
       ...(screenName ? { screen_name: screenName } : {}),
-      ...(since_id ? { since_id } : {}),
+      ...(max_id ? { max_id } : {}),
       count: numTweets /*  - fetchedTweets.length */,
       include_rts: true,
       exclude_replies: false,
@@ -34,7 +34,7 @@ async function getTimeline({ userId, numTweets, screenName, filterFn }) {
     }
 
     // on the next attempt, fetch tweets older than the oldest one we just fetched
-    since_id = result.data.slice(-1)[0].id;
+    max_id = result.data.slice(-1)[0].id;
 
     fetchedTweets = uniqBy(
       [...fetchedTweets, ...result.data.filter(filterFn)],
