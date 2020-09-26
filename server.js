@@ -43,10 +43,9 @@ app.get("/api/stream", async function (req, res) {
 });
 
 app.get("/api/get", async function (req, res) {
-  console.log("🌟🚨: req.query.ids", req.query.ids);
   const ids = req.query.ids.split(",");
 
-  const tweets = await getTweets(ids);
+  const tweets = await getTweets(ids).catch((err) => console.log(err));
 
   res.json(tweets);
 });
