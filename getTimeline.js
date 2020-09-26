@@ -34,7 +34,10 @@ async function getTimeline({ userId, numTweets, screenName, filterFn, maxId }) {
     }
 
     // on the next attempt, fetch tweets older than the oldest one we just fetched
-    max_id = result.data.slice(-1)[0].id;
+    max_id = result.data.reduce(
+      (acc, cur) => Math.min(acc, Number(cur.id_str)),
+      Infinity
+    );
 
     fetchedTweets = uniqBy(
       [...fetchedTweets, ...result.data.filter(filterFn)],
