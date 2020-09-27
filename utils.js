@@ -37,11 +37,12 @@ function filterByMediaType(node, allowedMediaTypes) {
   const mediaArr = getMediaArr(node);
   const first = mediaArr[0];
 
-  if (
-    allowedMediaTypes.includes("all") ||
-    (allowedMediaTypes.includes("text") &&
-      allowedMediaTypes.includes("video") &&
-      allowedMediaTypes.includes("photo"))
+  if (!allowedMediaTypes || allowedMediaTypes.length === 0) {
+    return true;
+  } else if (
+    allowedMediaTypes.includes("text") &&
+    allowedMediaTypes.includes("video") &&
+    allowedMediaTypes.includes("photo")
   ) {
     return !first;
   } else if (
@@ -79,6 +80,8 @@ function filterByMediaType(node, allowedMediaTypes) {
     return first && first.type && first.type === "video";
   } else if (allowedMediaTypes.includes("photo")) {
     return first && first.type && first.type === "photo";
+  } else if (allowedMediaTypes.includes("text")) {
+    return !first;
   } else {
     return true;
   }

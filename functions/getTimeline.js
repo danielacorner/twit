@@ -43,6 +43,7 @@ async function getTimeline({ userId, numTweets, screenName, filterFn, maxId }) {
       [...fetchedTweets, ...result.data.filter(filterFn)],
       (t) => t.id_str
     );
+    console.log("🌟🚨: getTimeline -> fetchedTweets", fetchedTweets.length);
   }
 
   return fetchedTweets.slice(0, numTweets);

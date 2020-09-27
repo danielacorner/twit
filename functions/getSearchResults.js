@@ -15,7 +15,7 @@ async function getSearchResults({
   term,
   numTweets,
   lang,
-  mediaType,
+  allowedMediaTypes,
   geocode,
   result_type,
 }) {
@@ -49,7 +49,7 @@ async function getSearchResults({
     data: { ...result.data, statuses: statusesWithMedia },
   };
 
-  if (!mediaType) {
+  if (!allowedMediaTypes) {
     return result;
   } else {
     while (resultsWithMedia.data.statuses.length < numTweets) {
@@ -71,7 +71,7 @@ async function getSearchResults({
       resultsWithMedia.data.statuses = [
         ...resultsWithMedia.data.statuses,
         ...nextResult.data.statuses.filter((node) =>
-          filterByMediaType(node, mediaType, null)
+          filterByMediaType(node, allowedMediaTypes, null)
         ),
       ];
     }

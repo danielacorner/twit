@@ -30,6 +30,7 @@ app.get("/api/stream", async function (req, res) {
   const filterLevel = req.query.filterLevel;
   const allowedMediaTypes =
     req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
+  console.log("🌟🚨: stream allowedMediaTypes", allowedMediaTypes);
   const countryCode = req.query.countryCode;
   const lang = req.query.lang;
   const filterFn = getFilterFn({
@@ -62,6 +63,7 @@ app.get("/api/filter", async function (req, res) {
   const locations = req.query.locations;
   const allowedMediaTypes =
     req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
+  console.log("🌟🚨: filter allowedMediaTypes", allowedMediaTypes);
   const filterFn = getFilterFn({ allowedMediaTypes });
 
   const tweets = await streamFilteredTweets({
@@ -99,6 +101,8 @@ app.get("/api/user_likes", async function (req, res) {
   const numTweets = req.query.num;
   const allowedMediaTypes =
     req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
+  console.log("🌟🚨: likes allowedMediaTypes", allowedMediaTypes);
+
   const filterFn = getFilterFn({ allowedMediaTypes });
 
   const tweets = await getLikes({
