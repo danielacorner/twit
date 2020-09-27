@@ -5,7 +5,6 @@ const { T, sentiment } = require("../utils");
 
 /** https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/api-reference/post-statuses-filter */
 async function streamFilteredTweets({ numTweets, filterFn, locations }) {
-  console.log("🌟🚨: streamFilteredTweets -> filterFn", filterFn);
   return new Promise((resolve, reject) => {
     const stream = T.stream(`statuses/filter`, {
       // Each bounding box should be specified as a pair of longitude and latitude pairs, with the southwest corner of the bounding box coming first.
@@ -20,8 +19,6 @@ async function streamFilteredTweets({ numTweets, filterFn, locations }) {
     const tweets = [];
 
     console.log("Streaming filtered tweets 🐦");
-
-    console.log("🌟🚨: streamFilteredTweets -> locations", locations);
 
     // if filtering by mediaType, keep fetching until we get that many
 
