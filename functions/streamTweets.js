@@ -1,5 +1,5 @@
 module.exports = streamTweets;
-const { T, sentiment } = require("./utils");
+const { T, sentiment } = require("../utils");
 
 // stream -> receive continuously
 

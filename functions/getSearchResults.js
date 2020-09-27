@@ -1,5 +1,5 @@
 module.exports = getSearchResults;
-const { T, getMediaArr, filterByMediaType } = require("./utils");
+const { T, getMediaArr, filterByMediaType } = require("../utils");
 const uniqBy = require("lodash.uniqby");
 
 function sleep(ms) {

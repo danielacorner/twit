@@ -1,10 +1,11 @@
 module.exports = streamFilteredTweets;
-const { T, sentiment } = require("./utils");
+const { T, sentiment } = require("../utils");
 
 // filter -> fetch with filters (location, users, etc)
 
 /** https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/api-reference/post-statuses-filter */
 async function streamFilteredTweets({ numTweets, filterFn, locations }) {
+  console.log("🌟🚨: streamFilteredTweets -> filterFn", filterFn);
   return new Promise((resolve, reject) => {
     const stream = T.stream(`statuses/filter`, {
       // Each bounding box should be specified as a pair of longitude and latitude pairs, with the southwest corner of the bounding box coming first.

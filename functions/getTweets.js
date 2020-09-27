@@ -1,5 +1,5 @@
 module.exports = getTweets;
-const { T } = require("./utils");
+const { T } = require("../utils");
 
 /** https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline */
 async function getTweets(ids) {

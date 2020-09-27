@@ -1,5 +1,5 @@
 module.exports = getUserInfo;
-const { T } = require("./utils");
+const { T } = require("../utils");
 
 // https://www.npmjs.com/package/twit
 async function getUserInfo({ userId, screenName }) {

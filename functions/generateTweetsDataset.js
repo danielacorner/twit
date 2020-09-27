@@ -1,5 +1,5 @@
 module.exports = { generateNewTweetsDataset, addSentimentToTweet };
-const { stream, sentiment } = require("./utils");
+const { stream, sentiment } = require("../utils");
 
 const fs = require("fs");
 

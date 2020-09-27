@@ -1,14 +1,14 @@
 const express = require("express");
 const app = express();
 const path = require("path");
-const streamTweets = require("./streamTweets");
+const streamTweets = require("./functions/streamTweets");
 const { FILTER_LEVEL, filterByMediaType } = require("./utils");
-const getTimeline = require("./getTimeline");
-const getSearchResults = require("./getSearchResults");
-const getUserInfo = require("./getUserInfo");
-const streamFilteredTweets = require("./streamFilteredTweets");
-const getTweets = require("./getTweets");
-const getLikes = require("./getLikes");
+const getTimeline = require("./functions/getTimeline");
+const getSearchResults = require("./functions/getSearchResults");
+const getUserInfo = require("./functions/getUserInfo");
+const streamFilteredTweets = require("./functions/streamFilteredTweets");
+const getTweets = require("./functions/getTweets");
+const getLikes = require("./functions/getLikes");
 
 app.use(express.static(`main`));
 
@@ -28,10 +28,17 @@ app.get("/", function (req, res) {
 // https://developer.twitter.com/en/docs/twitter-api/v1/tweets/sample-realtime/overview/get_statuses_sample
 app.get("/api/stream", async function (req, res) {
   const filterLevel = req.query.filterLevel;
-  const mediaType = req.query.mediaType;
+  const allowedMediaTypes =
+    req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
   const countryCode = req.query.countryCode;
   const lang = req.query.lang;
-  const filterFn = getFilterFn({ mediaType, filterLevel, countryCode, lang });
+  const filterFn = getFilterFn({
+    allowedMediaTypes,
+    filterLevel,
+    countryCode,
+    lang,
+  });
+  console.log("🌟🚨: filterFn", filterFn);
 
   const tweets = await streamTweets({
     numTweets: +req.query.num,
@@ -53,8 +60,9 @@ app.get("/api/get", async function (req, res) {
 // https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/api-reference/post-statuses-filter
 app.get("/api/filter", async function (req, res) {
   const locations = req.query.locations;
-  const mediaType = req.query.mediaType;
-  const filterFn = getFilterFn({ mediaType });
+  const allowedMediaTypes =
+    req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
+  const filterFn = getFilterFn({ allowedMediaTypes });
 
   const tweets = await streamFilteredTweets({
     numTweets: +req.query.num,
@@ -69,9 +77,10 @@ app.get("/api/user_timeline", async function (req, res) {
   const id_str = req.query.id_str;
   const screen_name = req.query.screen_name;
   const numTweets = req.query.num;
-  const mediaType = req.query.mediaType;
+  const allowedMediaTypes =
+    req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
   const maxId = req.query.maxId || null;
-  const filterFn = getFilterFn({ mediaType });
+  const filterFn = getFilterFn({ allowedMediaTypes });
 
   const tweets = await getTimeline({
     numTweets,
@@ -88,8 +97,9 @@ app.get("/api/user_likes", async function (req, res) {
   const id_str = req.query.id_str;
   const screen_name = req.query.screen_name;
   const numTweets = req.query.num;
-  const mediaType = req.query.mediaType;
-  const filterFn = getFilterFn({ mediaType });
+  const allowedMediaTypes =
+    req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
+  const filterFn = getFilterFn({ allowedMediaTypes });
 
   const tweets = await getLikes({
     numTweets,
@@ -116,14 +126,16 @@ app.get("/api/search", async function (req, res) {
   const term = req.query.term;
   const numTweets = req.query.num;
   const lang = req.query.lang;
-  const mediaType = req.query.mediaType;
+  const allowedMediaTypes =
+    req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
+  console.log("🌟🚨: allowedMediaTypes", allowedMediaTypes);
   const result_type = req.query.result_type;
   const geocode = req.query.geocode;
   getSearchResults({
     numTweets,
     term,
     lang,
-    mediaType,
+    allowedMediaTypes,
     result_type,
     geocode,
   })
@@ -140,9 +152,9 @@ app.listen(process.env.PORT || 8080);
 
 // tweet object
 // https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object
-function getFilterFn({ mediaType, filterLevel, countryCode, lang }) {
+function getFilterFn({ allowedMediaTypes, filterLevel, countryCode, lang }) {
   return (node) =>
-    filterByMediaType(node, mediaType, filterLevel) &&
+    filterByMediaType(node, allowedMediaTypes, filterLevel) &&
     filterByQualityLevel(node, filterLevel) &&
     filterByLocation(node, countryCode) &&
     filterByLang(node, lang);

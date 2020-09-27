@@ -27,28 +27,60 @@ const Twit = require("twit");
 // https://github.com/ttezel/twit
 const T = new Twit(config);
 
-const FILTER_BY = {
-  imageAndVideo: "imageAndVideo",
-  imageOnly: "imageOnly",
-  videoOnly: "videoOnly",
-};
 const FILTER_LEVEL = {
   none: "none",
   low: "low",
   medium: "medium",
 };
 
-function filterByMediaType(node, mediaType) {
-  const first = getMediaArr(node)[0];
-  switch (mediaType) {
-    case FILTER_BY.imageAndVideo:
-      return first && first.type && ["photo", "video"].includes(first.type);
-    case FILTER_BY.imageOnly:
-      return first && first.type === "photo";
-    case FILTER_BY.videoOnly:
-      return first && first.type === "video";
-    default:
-      return true;
+function filterByMediaType(node, allowedMediaTypes) {
+  const mediaArr = getMediaArr(node);
+  const first = mediaArr[0];
+
+  if (
+    allowedMediaTypes.includes("all") ||
+    (allowedMediaTypes.includes("text") &&
+      allowedMediaTypes.includes("video") &&
+      allowedMediaTypes.includes("photo"))
+  ) {
+    return !first;
+  } else if (
+    allowedMediaTypes.includes("photo") &&
+    allowedMediaTypes.includes("video")
+  ) {
+    return first && first.type && ["photo", "video"].includes(first.type);
+  } else if (
+    allowedMediaTypes.includes("photo") &&
+    allowedMediaTypes.includes("text")
+  ) {
+    return (
+      // don't need to have an item
+      !first ||
+      // if we do, all items can only be video
+      mediaArr.reduce(
+        (acc, mediaItem) => acc && mediaItem.type !== "video",
+        true
+      )
+    );
+  } else if (
+    allowedMediaTypes.includes("video") &&
+    allowedMediaTypes.includes("text")
+  ) {
+    return (
+      // don't need to have an item
+      !first ||
+      // if we do, all items can only be photo
+      mediaArr.reduce(
+        (acc, mediaItem) => acc && mediaItem.type !== "photo",
+        true
+      )
+    );
+  } else if (allowedMediaTypes.includes("video")) {
+    return first && first.type && first.type === "video";
+  } else if (allowedMediaTypes.includes("photo")) {
+    return first && first.type && first.type === "photo";
+  } else {
+    return true;
   }
 }
 
@@ -60,7 +92,6 @@ module.exports = {
   sentiment,
   T,
   stream,
-  FILTER_BY,
   FILTER_LEVEL,
   filterByMediaType,
 };

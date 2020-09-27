@@ -1,6 +1,6 @@
 module.exports = generateBotScore;
 
-const { config, rapidapi_key } = require("./config");
+const { config, rapidapi_key } = require("../config");
 const unirest = require("unirest");
 const Twit = require("twit");
 const fs = require("fs");
