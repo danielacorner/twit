@@ -30,7 +30,6 @@ app.get("/api/stream", async function (req, res) {
   const filterLevel = req.query.filterLevel;
   const allowedMediaTypes =
     req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
-  console.log("🌟🚨: stream allowedMediaTypes", allowedMediaTypes);
   const countryCode = req.query.countryCode;
   const lang = req.query.lang;
   const filterFn = getFilterFn({
@@ -39,7 +38,6 @@ app.get("/api/stream", async function (req, res) {
     countryCode,
     lang,
   });
-  console.log("🌟🚨: filterFn", filterFn);
 
   const tweets = await streamTweets({
     numTweets: +req.query.num,
@@ -63,7 +61,6 @@ app.get("/api/filter", async function (req, res) {
   const locations = req.query.locations;
   const allowedMediaTypes =
     req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
-  console.log("🌟🚨: filter allowedMediaTypes", allowedMediaTypes);
   const filterFn = getFilterFn({ allowedMediaTypes });
 
   const tweets = await streamFilteredTweets({
@@ -101,7 +98,6 @@ app.get("/api/user_likes", async function (req, res) {
   const numTweets = req.query.num;
   const allowedMediaTypes =
     req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
-  console.log("🌟🚨: likes allowedMediaTypes", allowedMediaTypes);
 
   const filterFn = getFilterFn({ allowedMediaTypes });
 
@@ -132,7 +128,6 @@ app.get("/api/search", async function (req, res) {
   const lang = req.query.lang;
   const allowedMediaTypes =
     req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
-  console.log("🌟🚨: allowedMediaTypes", allowedMediaTypes);
   const result_type = req.query.result_type;
   const geocode = req.query.geocode;
   getSearchResults({
@@ -152,7 +147,9 @@ app.get("/api/search", async function (req, res) {
     });
 });
 
-app.listen(process.env.PORT || 8080);
+app.listen(process.env.PORT || 8080, () => {
+  console.log("server listening on port " + (process.env.PORT || 8080));
+});
 
 // tweet object
 // https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object

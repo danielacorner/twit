@@ -24,7 +24,6 @@ function streamTweetsIntoDB() {
   stream.on("tweet", (tweet) => {
     createTweetInDB(tweet).then((ret) => {
       numTweets++;
-      console.log("🌟🚨: streamTweetsIntoDB -> numTweets", numTweets);
     });
 
     if (numTweets >= (numTweetsFromArgs || numTweetsDefault)) {

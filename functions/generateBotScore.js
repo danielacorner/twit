@@ -18,8 +18,6 @@ const T = new Twit(config);
 //   callback: (err, data, response) => {
 //     console.log("status: ", response.statusCode);
 //     if (err) throw err;
-//     console.log("🌟🚨: data", data);
-//     console.log("🌟🚨: response", response);
 //   },
 // });
 function getTimeline({ id, name, callback }) {
@@ -70,7 +68,7 @@ function onReceiveTimeline(err, data, response, { id, name }) {
   if (err) throw err;
 
   console.log(
-    `🌟🚨: writing ${
+    `🌟: writing ${
       data.length
     } tweets to timeline.json for user ${JSON.stringify({
       id,
