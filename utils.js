@@ -37,52 +37,35 @@ function filterByMediaType(node, allowedMediaTypes) {
   const mediaArr = getMediaArr(node);
   const first = mediaArr[0];
 
-  if (!allowedMediaTypes || allowedMediaTypes.length === 0) {
+  if (
+    // if none specified,
+    !allowedMediaTypes ||
+    allowedMediaTypes.length === 0 ||
+    // or if all specified,
+    (allowedMediaTypes.includes("text") &&
+      allowedMediaTypes.includes("video") &&
+      allowedMediaTypes.includes("photo") &&
+      allowedMediaTypes.includes("animated_gif"))
+  ) {
+    // don't filter
     return true;
   } else if (
-    allowedMediaTypes.includes("text") &&
-    allowedMediaTypes.includes("video") &&
-    allowedMediaTypes.includes("photo")
-  ) {
-    return !first;
-  } else if (
-    allowedMediaTypes.includes("photo") &&
+    // if one of photo, video, or animated_gif is specified,
+    allowedMediaTypes.includes("photo") ||
+    allowedMediaTypes.includes("animated_gif") ||
     allowedMediaTypes.includes("video")
   ) {
-    return first && first.type && ["photo", "video"].includes(first.type);
-  } else if (
-    allowedMediaTypes.includes("photo") &&
-    allowedMediaTypes.includes("text")
-  ) {
-    return (
-      // don't need to have an item
-      !first ||
-      // if we do, all items can only be video
-      mediaArr.reduce(
-        (acc, mediaItem) => acc && mediaItem.type !== "video",
-        true
-      )
-    );
-  } else if (
-    allowedMediaTypes.includes("video") &&
-    allowedMediaTypes.includes("text")
-  ) {
-    return (
-      // don't need to have an item
-      !first ||
-      // if we do, all items can only be photo
-      mediaArr.reduce(
-        (acc, mediaItem) => acc && mediaItem.type !== "photo",
-        true
-      )
-    );
-  } else if (allowedMediaTypes.includes("video")) {
-    return first && first.type && first.type === "video";
-  } else if (allowedMediaTypes.includes("photo")) {
-    return first && first.type && first.type === "photo";
-  } else if (allowedMediaTypes.includes("text")) {
-    return !first;
+    // is media required?
+    const isMediaRequired = !allowedMediaTypes.includes("text");
+
+    if (isMediaRequired) {
+      return first && first.type && allowedMediaTypes.includes(first.type);
+    } else {
+      // allow tweets without media
+      return !first || (first.type && allowedMediaTypes.includes(first.type));
+    }
   } else {
+    // fallback to true in case something goes wrong
     return true;
   }
 }
