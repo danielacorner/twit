@@ -6,7 +6,7 @@ const MAX_ATTEMPTS = 10;
 
 /** https://developer.twitter.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-retweeters-ids */
 async function getRetweeters({ tweetId, numTweets, filterFn }) {
-  console.log("fetching retweeters of a tweet 🐦");
+  console.log("fetching retweets of a tweet 🐦");
 
   // if filtering by mediaType, keep fetching until we get that many
 
