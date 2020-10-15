@@ -139,7 +139,9 @@ app.get("/api/user_likes", async function (req, res) {
 // https://developer.twitter.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-retweeters-ids
 // get users who retweeted a tweet id
 app.get("/api/retweets", async function (req, res) {
-  const id_str = "1316624321754796034";
+  // working example:
+  // const id_str = "1316624321754796034";
+  const id_str = req.query.id_str;
   console.log("🌟🚨: id_str", id_str);
   const screen_name = req.query.screen_name;
   const numTweets = req.query.num;
