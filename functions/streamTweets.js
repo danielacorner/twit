@@ -23,7 +23,7 @@ async function streamTweets({ numTweets, filterFn }) {
 
         // console log every so often
         // if (count % (filterFn ? 1 : 10) === 0) {
-        console.log(`tweets fetched: ${count}`);
+        console.log(`tweets fetched: ${count} - id_str: ${tweet.id_str}`);
         // }
 
         // ? if too slow, move this to a separate batch request

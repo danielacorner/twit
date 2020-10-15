@@ -9,6 +9,8 @@ const getUserInfo = require("./functions/getUserInfo");
 const streamFilteredTweets = require("./functions/streamFilteredTweets");
 const getTweets = require("./functions/getTweets");
 const getLikes = require("./functions/getLikes");
+const getUserMentions = require("./functions/getUserMentions");
+const getRetweeters = require("./functions/getRetweeters");
 
 app.use(express.static(`main`));
 
@@ -105,6 +107,51 @@ app.get("/api/user_likes", async function (req, res) {
     numTweets,
     filterFn,
     userId: id_str,
+    screenName: screen_name,
+  });
+  res.json(tweets);
+});
+
+// https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline
+// https://stackoverflow.com/questions/2693553/replies-to-a-particular-tweet-twitter-api
+//
+// since we can only fetch from statuses/mentions_timeline,
+// we'll fetch all the replies to this user
+// * (later we could filter out other replies to this user, leaving only the ones to this tweet)
+// app.get("/api/user_mentions", async function (req, res) {
+//   const id_str = req.query.id_str;
+//   const screen_name = req.query.screen_name;
+//   const numTweets = req.query.num;
+//   const allowedMediaTypes =
+//     req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
+
+//   const filterFn = getFilterFn({ allowedMediaTypes });
+
+//   const tweets = await getUserMentions({
+//     numTweets,
+//     filterFn,
+//     userId: id_str,
+//     screenName: screen_name,
+//   });
+//   res.json(tweets);
+// });
+
+// https://developer.twitter.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-retweeters-ids
+// get users who retweeted a tweet id
+app.get("/api/retweets", async function (req, res) {
+  const id_str = "1316624321754796034";
+  console.log("🌟🚨: id_str", id_str);
+  const screen_name = req.query.screen_name;
+  const numTweets = req.query.num;
+  const allowedMediaTypes =
+    req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
+
+  const filterFn = getFilterFn({ allowedMediaTypes });
+
+  const tweets = await getRetweeters({
+    numTweets,
+    filterFn,
+    tweetId: id_str,
     screenName: screen_name,
   });
   res.json(tweets);
