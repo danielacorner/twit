@@ -98,6 +98,7 @@ app.get("/api/user_likes", async function (req, res) {
   const id_str = req.query.id_str;
   const screen_name = req.query.screen_name;
   const numTweets = req.query.num;
+  const max_id = req.query.max_id;
   const allowedMediaTypes =
     req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
 
@@ -108,6 +109,7 @@ app.get("/api/user_likes", async function (req, res) {
     filterFn,
     userId: id_str,
     screenName: screen_name,
+    maxId: max_id,
   });
   res.json(tweets);
 });

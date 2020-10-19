@@ -53,11 +53,13 @@ async function getSearchResults({
       const nextResult = await T.get(`search/tweets`, {
         q: term,
         count: numTweets,
-        max_id,
+        ...(max_id ? { max_id } : {}),
         ...(lang ? { lang } : {}),
       });
 
-      max_id = nextResult.data.statuses[numTweets - 1].id_str;
+      const last_tweet = nextResult.data.statuses[numTweets - 1];
+
+      max_id = last_tweet ? last_tweet.id_str : null;
 
       resultsWithMedia.data.statuses = [
         ...resultsWithMedia.data.statuses,

@@ -5,7 +5,13 @@ const uniqBy = require("lodash.uniqby");
 const MAX_ATTEMPTS = 10;
 
 /** https://developer.twitter.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-favorites-list */
-async function getLikes({ userId, numTweets, screenName, filterFn }) {
+async function getLikes({
+  userId,
+  numTweets,
+  screenName,
+  filterFn,
+  maxId = null,
+}) {
   console.log("fetching liked tweets 🐦");
 
   // if filtering by mediaType, keep fetching until we get that many
@@ -15,7 +21,7 @@ async function getLikes({ userId, numTweets, screenName, filterFn }) {
 
   let attempts = 0;
   let fetchedTweets = [];
-  let max_id = null;
+  let max_id = maxId;
 
   while (fetchedTweets.length < numTweets && attempts < MAX_ATTEMPTS) {
     attempts++;
@@ -23,7 +29,7 @@ async function getLikes({ userId, numTweets, screenName, filterFn }) {
     const result = await T.get(`favorites/list`, {
       ...(userId ? { user_id: userId } : {}),
       ...(screenName ? { screen_name: screenName } : {}),
-      ...(max_id ? { max_id } : {}),
+      ...(max_id ? { max_id: Number(max_id) } : {}),
       count: numTweets /*  - fetchedTweets.length */,
       include_rts: true,
       exclude_replies: false,
