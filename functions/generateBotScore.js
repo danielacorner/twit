@@ -1,135 +1,73 @@
-module.exports = generateBotScore;
+const axios = require("axios").default;
 
-const { config, rapidapi_key } = require("../config");
-const unirest = require("unirest");
-const Twit = require("twit");
-const fs = require("fs");
+async function generateBotScore(tweetsByUser, res) {
+  return new Promise((resolve, reject) => {
+    const user = tweetsByUser[0].user;
 
-// https://github.com/ttezel/twit
-const T = new Twit(config);
+    const options = {
+      method: "POST",
+      url: "https://rapidapi.p.rapidapi.com/4/check_account",
+      headers: {
+        "content-type": "application/json",
+        "x-rapidapi-host": "botometer-pro.p.rapidapi.com",
+        "x-rapidapi-key": process.env.BOTOMETER_RAPIDAPI_KEY,
+      },
+      data: { mentions: [], timeline: tweetsByUser, user },
+    };
 
-// usage:
-// generateBotScore({ /* id: "888047946876542976",  */ name: "danielacorner" }); // * use id_str not id from tweet's user data
+    // https://botometer.osome.iu.edu/faq
+    // https://rapidapi.com/OSoMe/api/botometer-pro/details
 
-// Twitter API reference https://developer.twitter.com/en/docs/api-reference-index
+    axios
+      .request(options)
+      .then(function (response) {
+        const {
+          cap, // Complete Automation Probability (CAP) is the conditional probability that accounts with a score equal to or greater than this are automated; based on inferred language
+          // What is Complete Automation Probability (CAP)?
+          // While bot scores are useful for visualization and behavior analysis, they don't provide enough information by themselves to make a judgement about an account. A more meaningful way to interpret a score is to ask: "What are the chances that an account with a bot score higher than this account is human, or automated?" To answer this question, the Botometer API provides the so-called CAP, defined as the probability, according to our models, that an account with this score or greater is controlled by software, i.e., is a bot. (For the statisticians, this conditional probability calculation uses Bayes' theorem to take into account an estimate of the overall prevalence of bots, so as to balance false positives with false negatives.)
 
-// getTimeline({
-//   id: "888047946876542976",
-//   callback: (err, data, response) => {
-//     console.log("status: ", response.statusCode);
-//     if (err) throw err;
-//   },
-// });
-function getTimeline({ id, name, callback }) {
-  T.get(
-    "statuses/user_timeline", // https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline
-    {
-      ...(id ? { user_id: id } : {}),
-      ...(name ? { screen_name: name } : {}),
-    },
-    callback
-  );
-}
+          display_scores,
+          raw_scores,
+        } = response.data;
+        const { english, universal } = raw_scores;
 
-// https://botometer.iuni.iu.edu/#!/api
-/** uses the Botometer API to generate probability 0-1 that account is a bot
- * @param id user id
- * @param name username (twitter handle)
- */
-function generateBotScore({ id, name }) {
-  // Botometer API requires a scraped timeline of tweets
-  getTimeline({
-    id,
-    name,
-    callback: (err, data, response) => {
-      // getTimeline only requires id OR name,
-      // but requestBotometerScore requires both
-      // so populate whichever is missing using the data
+        // * currently we'll only use english
 
-      // first tweet result contains user info
-      const tweet = data[0];
-      const idFromDatum = tweet.user.id_str;
-      const nameFromDatum = tweet.user.screen_name;
+        // Bot scores are displayed on a 0-to-5 scale with zero being most human-like and five being the most bot-like. A score in the middle of the scale is a signal that our classifier is uncertain about the classification.
 
-      onReceiveTimeline(err, data, response, {
-        id: id || idFromDatum,
-        name: name || nameFromDatum,
+        //       Bot types:
+
+        // fake_follower: bots purchased to increase follower counts
+        // self_declared: bots from botwiki.org
+        // astroturf: manually labeled political bots and accounts involved in follow trains that systematically delete content
+        // spammer: accounts labeled as spambots from several datasets
+        // financial: bots that post using cashtags
+        // other: miscellaneous other bots obtained from manual annotation, user feedback, etc.
+
+        const {
+          astroturf,
+          fake_follower,
+          financial,
+          other,
+          overall,
+          self_declared,
+          spammer,
+        } = english;
+
+        resolve({
+          astroturf,
+          fake_follower,
+          financial,
+          other,
+          overall,
+          self_declared,
+          spammer,
+        });
+      })
+      .catch(function (error) {
+        console.error(error);
       });
-    },
   });
 }
 
-// TODO: also get mentions? Does that improve the bot score?
-/** once we receive the timeline,
- * save to file, and
- * send it to Botometer */
-function onReceiveTimeline(err, data, response, { id, name }) {
-  console.log("status: ", response.statusCode);
-  if (err) throw err;
-
-  console.log(
-    `🌟: writing ${
-      data.length
-    } tweets to timeline.json for user ${JSON.stringify({
-      id,
-      name,
-    })}`
-  );
-
-  // save to file
-  writeTimelineToFile(data);
-
-  // Botometer
-  // * requires both user id and name
-  // TODO
-  // requestBotometerScore({ id, name }, data);
-}
-
-function requestBotometerScore({ id, name }, data) {
-  const req = unirest(
-    "POST",
-    "https://botometer-pro.p.rapidapi.com/2/check_account"
-  );
-
-  req.headers({
-    "x-rapidapi-host": "botometer-pro.p.rapidapi.com",
-    "x-rapidapi-key": rapidapi_key,
-    "content-type": "application/json",
-    accept: "application/json",
-    useQueryString: true,
-  });
-
-  req.type("json");
-  req.send({
-    user: { id, screen_name: name },
-    timeline: data,
-    mentions: [],
-  });
-
-  req.end(function (res) {
-    if (res.error) throw new Error(res.error);
-
-    console.log(res.body);
-  });
-}
-
-const FILE_PATH = "./timeline.json";
-
-function writeTimelineToFile(response) {
-  fs.unlink(FILE_PATH, (err) => {
-    if (err) console.log(err);
-    fs.open(FILE_PATH, "w", (err, fileDirNum) =>
-      onOpened(err, fileDirNum, response)
-    );
-  });
-}
-function onOpened(err, fileDirNum, response) {
-  fs.write(fileDirNum, JSON.stringify(response), null, "utf8", () =>
-    onWriteToFile(fileDirNum)
-  );
-}
-function onWriteToFile(fileDirNum) {
-  fs.close(fileDirNum, () => {
-    console.log("Finished writing to timeline.json");
-  });
-}
+module.exports = generateBotScore;

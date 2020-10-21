@@ -1,4 +1,5 @@
 const express = require("express");
+const bodyParser = require("body-parser");
 const app = express();
 const path = require("path");
 const streamTweets = require("./functions/streamTweets");
@@ -10,9 +11,11 @@ const streamFilteredTweets = require("./functions/streamFilteredTweets");
 const getTweets = require("./functions/getTweets");
 const getLikes = require("./functions/getLikes");
 const getUserMentions = require("./functions/getUserMentions");
+const generateBotScore = require("./functions/generateBotScore");
 const getRetweeters = require("./functions/getRetweeters");
 
 app.use(express.static(`main`));
+app.use(bodyParser.json());
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -112,6 +115,40 @@ app.get("/api/user_likes", async function (req, res) {
     maxId: max_id,
   });
   res.json(tweets);
+});
+
+// https://rapidapi.com/OSoMe/api/botometer-pro/endpoints
+app.post("/api/generate_bot_score", async function (req, res) {
+  const tweetsByUser = req.body;
+
+  const {
+    astroturf,
+    fake_follower,
+    financial,
+    other,
+    overall,
+    self_declared,
+    spammer,
+  } = await generateBotScore(tweetsByUser);
+
+  //       Bot types:
+
+  // fake_follower: bots purchased to increase follower counts
+  // self_declared: bots from botwiki.org
+  // astroturf: manually labeled political bots and accounts involved in follow trains that systematically delete content
+  // spammer: accounts labeled as spambots from several datasets
+  // financial: bots that post using cashtags
+  // other: miscellaneous other bots obtained from manual annotation, user feedback, etc.
+
+  res.json({
+    astroturf,
+    fake_follower,
+    financial,
+    other,
+    overall,
+    self_declared,
+    spammer,
+  });
 });
 
 // https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline
