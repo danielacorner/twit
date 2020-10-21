@@ -80,7 +80,7 @@ app.get("/api/user_timeline", async function (req, res) {
   const numTweets = req.query.num;
   const allowedMediaTypes =
     req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
-  const maxId = req.query.maxId || null;
+  const maxId = req.query.max_id || null;
   const filterFn = getFilterFn({ allowedMediaTypes });
 
   const tweets = await getTimeline({
