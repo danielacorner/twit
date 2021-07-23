@@ -18,6 +18,7 @@
     "express": "^4.17.1",
     "faunadb": "^3.0.1",
     "lodash.uniqby": "^4.7.0",
+    "needle": "^2.8.0",
     "node-twitter-api": "^1.8.0",
     "nodemon": "^2.0.4",
     "sentiment": "^5.0.2",
