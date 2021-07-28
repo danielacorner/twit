@@ -6,7 +6,7 @@ async function generateBotScore(tweetsByUser, res) {
 
     const options = {
       method: "POST",
-      url: "https://rapidapi.p.rapidapi.com/4/check_account",
+      url: "https://botometer-pro.p.rapidapi.com/4/check_account",
       headers: {
         "content-type": "application/json",
         "x-rapidapi-host": "botometer-pro.p.rapidapi.com",
@@ -17,10 +17,12 @@ async function generateBotScore(tweetsByUser, res) {
 
     // https://botometer.osome.iu.edu/faq
     // https://rapidapi.com/OSoMe/api/botometer-pro/details
+    // check usage at https://rapidapi.com/developer/dashboard
 
     axios
       .request(options)
       .then(function (response) {
+        console.log("🌟🚨 ~ response", response.statusText, response.status);
         const {
           cap, // Complete Automation Probability (CAP) is the conditional probability that accounts with a score equal to or greater than this are automated; based on inferred language
           // What is Complete Automation Probability (CAP)?
@@ -65,7 +67,7 @@ async function generateBotScore(tweetsByUser, res) {
         });
       })
       .catch(function (error) {
-        console.error(error);
+        console.log("🌟🚨 ~ returnnewPromise ~ error", error);
       });
   });
 }

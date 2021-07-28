@@ -13,6 +13,7 @@ const getLikes = require("./functions/getLikes");
 const getUserMentions = require("./functions/getUserMentions");
 const generateBotScore = require("./functions/generateBotScore");
 const getRetweeters = require("./functions/getRetweeters");
+const sendBotScoreToDB = require("./functions/sendBotScoreToDB");
 
 app.use(express.static(`main`));
 app.use(bodyParser.json());
@@ -121,6 +122,7 @@ app.get("/api/user_likes", async function (req, res) {
 app.post("/api/generate_bot_score", async function (req, res) {
   const tweetsByUser = req.body;
 
+  const botScore = await generateBotScore(tweetsByUser);
   const {
     astroturf,
     fake_follower,
@@ -129,8 +131,7 @@ app.post("/api/generate_bot_score", async function (req, res) {
     overall,
     self_declared,
     spammer,
-  } = await generateBotScore(tweetsByUser);
-
+  } = botScore;
   //       Bot types:
 
   // fake_follower: bots purchased to increase follower counts
@@ -140,15 +141,13 @@ app.post("/api/generate_bot_score", async function (req, res) {
   // financial: bots that post using cashtags
   // other: miscellaneous other bots obtained from manual annotation, user feedback, etc.
 
-  res.json({
-    astroturf,
-    fake_follower,
-    financial,
-    other,
-    overall,
-    self_declared,
-    spammer,
-  });
+  // whenever we generate a bot score
+  // send bot score to DB, so we can reliably display nodes with bot scores (botometer api limit)
+  // https://docs.fauna.com/fauna/current/cookbook/?lang=javascript#collection-create-document
+  // const user = getOriginalPoster(tweetsByUser[0]);
+  sendBotScoreToDB({ ...tweetsByUser[0], botScore });
+
+  res.json(botScore);
 });
 
 // https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline
@@ -270,4 +269,15 @@ function filterByLocation(node, countryCode) {
 
 function filterByLang(node, lang) {
   return !lang || node.lang === lang;
+}
+
+function getOriginalPoster(tweet /* : Tweet */) /* : User | null */ {
+  const retweetedUser = getRetweetedUser(tweet);
+  const originalPoster = retweetedUser ? retweetedUser : tweet && tweet.user;
+  return originalPoster;
+}
+function getRetweetedUser(tweet /* : Tweet */) /* : User | null */ {
+  return (
+    (tweet && tweet.retweeted_status && tweet.retweeted_status.user) || null
+  );
 }
