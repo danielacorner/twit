@@ -41,7 +41,10 @@ async function getTimeline({ userId, numTweets, screenName, filterFn, maxId }) {
       );
 
       fetchedTweets = uniqBy(
-        [...fetchedTweets, ...result.data.filter(filterFn)],
+        [
+          ...fetchedTweets,
+          ...result.data.filter(filterFn ? filterFn : () => true),
+        ],
         (t) => t.id_str
       );
       console.log("🌟: getTimeline -> fetchedTweets", fetchedTweets.length);

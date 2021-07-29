@@ -1,8 +1,21 @@
+const getTimeline = require("./getTimeline");
 const axios = require("axios").default;
 
 async function generateBotScore(tweetsByUser, res) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const user = tweetsByUser[0].user;
+    console.log("🌟🚨 ~ returnnewPromise ~ user", {
+      id_str: user.id_str,
+      screen_name: user.screen_name,
+    });
+
+    // TODO: fetch ~50? tweets for user, then pass them into timeline here
+    const timeline = await getTimeline({
+      userId: user.id_str,
+      numTweets: 50,
+      screenName: user.screen_name,
+    });
+    console.log("🌟🚨 ~ returnnewPromise ~ timeline", timeline.length);
 
     const options = {
       method: "POST",
@@ -12,7 +25,7 @@ async function generateBotScore(tweetsByUser, res) {
         "x-rapidapi-host": "botometer-pro.p.rapidapi.com",
         "x-rapidapi-key": process.env.BOTOMETER_RAPIDAPI_KEY,
       },
-      data: { mentions: [], timeline: tweetsByUser, user },
+      data: { mentions: [], timeline, user },
     };
 
     // https://botometer.osome.iu.edu/faq
@@ -25,12 +38,12 @@ async function generateBotScore(tweetsByUser, res) {
         console.log("🌟🚨 ~ response", response.statusText, response.status);
         const {
           cap, // Complete Automation Probability (CAP) is the conditional probability that accounts with a score equal to or greater than this are automated; based on inferred language
-          // What is Complete Automation Probability (CAP)?
           // While bot scores are useful for visualization and behavior analysis, they don't provide enough information by themselves to make a judgement about an account. A more meaningful way to interpret a score is to ask: "What are the chances that an account with a bot score higher than this account is human, or automated?" To answer this question, the Botometer API provides the so-called CAP, defined as the probability, according to our models, that an account with this score or greater is controlled by software, i.e., is a bot. (For the statisticians, this conditional probability calculation uses Bayes' theorem to take into account an estimate of the overall prevalence of bots, so as to balance false positives with false negatives.)
 
           display_scores,
           raw_scores,
         } = response.data;
+        console.log("🌟🚨 ~ raw_scores", raw_scores);
         const { english, universal } = raw_scores;
 
         // * currently we'll only use english
@@ -54,7 +67,7 @@ async function generateBotScore(tweetsByUser, res) {
           overall,
           self_declared,
           spammer,
-        } = english;
+        } = universal; // universal = language-independent
 
         resolve({
           astroturf,
