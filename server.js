@@ -14,6 +14,7 @@ const getUserMentions = require("./functions/getUserMentions");
 const generateBotScore = require("./functions/generateBotScore");
 const getRetweeters = require("./functions/getRetweeters");
 const sendBotScoreToDB = require("./functions/sendBotScoreToDB");
+const saveTweetsWithBotScore = require("./functions/saveTweetsWithBotScore");
 
 app.use(express.static(`main`));
 app.use(bodyParser.json());
@@ -118,11 +119,20 @@ app.get("/api/user_likes", async function (req, res) {
   res.json(tweets);
 });
 
+app.post("/api/save_bot_score_for_current_app_user", async function (req, res) {
+  const { appUserId, allTweetsWithBotScore, refId } = req.body;
+
+  await saveTweetsWithBotScore({ appUserId, allTweetsWithBotScore, refId });
+
+  res.json({ success: true });
+});
+
 // https://rapidapi.com/OSoMe/api/botometer-pro/endpoints
 app.post("/api/generate_bot_score", async function (req, res) {
   const tweetsByUser = req.body;
 
   const botScore = await generateBotScore(tweetsByUser);
+
   const {
     astroturf,
     fake_follower,

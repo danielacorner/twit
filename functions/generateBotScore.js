@@ -9,10 +9,11 @@ async function generateBotScore(tweetsByUser, res) {
       screen_name: user.screen_name,
     });
 
-    // TODO: fetch ~50? tweets for user, then pass them into timeline here
+    // * fetch ~50? tweets for user, then pass them into timeline here
+    const TWEETS_TO_FETCH = 200;
     const timeline = await getTimeline({
       userId: user.id_str,
-      numTweets: 50,
+      numTweets: TWEETS_TO_FETCH,
       screenName: user.screen_name,
     });
     console.log("🌟🚨 ~ returnnewPromise ~ timeline", timeline.length);
