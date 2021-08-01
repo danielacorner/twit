@@ -4,10 +4,6 @@ const axios = require("axios").default;
 async function generateBotScore(tweetsByUser, res) {
   return new Promise(async (resolve, reject) => {
     const user = tweetsByUser[0].user;
-    console.log("🌟🚨 ~ returnnewPromise ~ user", {
-      id_str: user.id_str,
-      screen_name: user.screen_name,
-    });
 
     // * fetch ~50? tweets for user, then pass them into timeline here
     const TWEETS_TO_FETCH = 200;
@@ -16,7 +12,6 @@ async function generateBotScore(tweetsByUser, res) {
       numTweets: TWEETS_TO_FETCH,
       screenName: user.screen_name,
     });
-    console.log("🌟🚨 ~ returnnewPromise ~ timeline", timeline.length);
 
     const options = {
       method: "POST",

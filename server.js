@@ -166,15 +166,17 @@ app.post("/api/generate_bot_score", async function (req, res) {
 
 app.get("/api/highscores", async function (req, res) {
   const highScores = await getPlayerScores();
+  console.log("🌟🚨 ~ highScores", highScores);
 
   res.json(highScores);
 });
-app.get("/api/save_highscore", async function (req, res) {
+app.post("/api/save_highscore", async function (req, res) {
   console.log("🌟🚨 ~ req", req);
-  const score = req.body;
-  const highScores = await getPlayerScores();
+  const { userId, name, score } = req.body;
+  const response = await savePlayerScore({ userId, name, score });
+  console.log("🌟🚨 ~ sabehighscore response", response);
 
-  res.json(highScores);
+  res.json(response);
 });
 
 // https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline

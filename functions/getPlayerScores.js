@@ -7,15 +7,16 @@ function getPlayerScores() {
     .query(q.Get(q.Collection("player_scores")))
     .then((ret) => {
       console.log("🌟🚨 ~ .then ~ ret", ret);
+      return ret.data;
     })
     .catch((err) => console.error("Error: %s", err));
 }
 
-function savePlayerScore(playerScore) {
+function savePlayerScore({ userId, name, score }) {
   return faunaClient
     .query(
       q.Create(q.Collection("player_scores"), {
-        data: { playerScore },
+        data: { userId, name, score },
       })
     )
     .then((ret) => {
