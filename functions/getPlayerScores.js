@@ -21,6 +21,7 @@ function savePlayerScore({ userId, name, score }) {
     )
     .then((ret) => {
       console.log("🌟🚨 ~ .then ~ ret", ret);
+      return ret.data;
     })
     .catch((err) => console.error("Error: %s", err));
 }
