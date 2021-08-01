@@ -15,6 +15,10 @@ const generateBotScore = require("./functions/generateBotScore");
 const getRetweeters = require("./functions/getRetweeters");
 const sendBotScoreToDB = require("./functions/sendBotScoreToDB");
 const saveTweetsWithBotScore = require("./functions/saveTweetsWithBotScore");
+const {
+  getPlayerScores,
+  savePlayerScore,
+} = require("./functions/getPlayerScores");
 
 app.use(express.static(`main`));
 app.use(bodyParser.json());
@@ -158,6 +162,19 @@ app.post("/api/generate_bot_score", async function (req, res) {
   sendBotScoreToDB({ ...tweetsByUser[0], botScore });
 
   res.json(botScore);
+});
+
+app.get("/api/highscores", async function (req, res) {
+  const highScores = await getPlayerScores();
+
+  res.json(highScores);
+});
+app.get("/api/save_highscore", async function (req, res) {
+  console.log("🌟🚨 ~ req", req);
+  const score = req.body;
+  const highScores = await getPlayerScores();
+
+  res.json(highScores);
 });
 
 // https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline

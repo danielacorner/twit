@@ -1,6 +1,6 @@
 const { stream } = require("./utils");
 const faunadb = require("faunadb");
-q = faunadb.query;
+const q = faunadb.query;
 require("dotenv").config();
 
 /** usage:
@@ -10,6 +10,7 @@ require("dotenv").config();
 const faunaClient = new faunadb.Client({
   secret: process.env.FAUNA_DB_KEY,
 });
+module.exports = { faunaClient };
 
 deleteAllTweetsInDB().then((ret) => {
   console.log("deleted all tweets");
