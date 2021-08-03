@@ -1,4 +1,4 @@
-// const cors = require("cors");
+const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
@@ -32,28 +32,13 @@ const ALLOW_LIST = [
   "https://twitter-viz.netlify.app/",
   "http://localhost:3000",
   "http://localhost:3000/",
-];
-// app.use(
-//   cors({
-//     origin: ALLOW_LIST,
-//   })
-// );
-
-app.use(function (req, res, next) {
-  if (ALLOW_LIST.includes(req.headers.origin)) {
-    res.header("Access-Control-Allow-Origin", req.headers.origin); // update to match the domain you will make the request from
-  }
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  // Request methods you wish to allow
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
-  );
-  next();
-});
+]; /*
+app.use(
+  cors({
+    origin: ALLOW_LIST,
+  })
+); */
+app.use(cors());
 
 app.use(express.static(`main`));
 
