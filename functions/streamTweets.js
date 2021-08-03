@@ -13,6 +13,7 @@ async function streamTweets({ numTweets, filterFn }) {
     console.log("Streaming tweets 🐦");
     try {
       stream.on("tweet", (tweet) => {
+        console.log("🌟🚨 ~ stream.on ~ tweet", tweet.id_str);
         // if the tweet isn't filtered out...
         if (filterFn && !filterFn(tweet)) {
           return;
