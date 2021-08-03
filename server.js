@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const app = express();
 const path = require("path");
 const streamTweets = require("./functions/streamTweets");
+const streamFilteredTweetsV2 = require("./functions/streamFilteredTweetsV2");
 const { FILTER_LEVEL, filterByMediaType } = require("./utils");
 const getTimeline = require("./functions/getTimeline");
 const getSearchResults = require("./functions/getSearchResults");
