@@ -35,6 +35,8 @@ const ALLOW_LIST = [
 // Add CORS headers
 app.use(function (req, res, next) {
   const origin = req.headers.origin;
+  console.log("🌟🚨 ~ origin", origin);
+  console.log("🌟🚨 ~ req.headers", req.headers);
 
   if (ALLOW_LIST.includes(origin)) {
     // Website you wish to allow to connect
