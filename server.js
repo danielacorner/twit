@@ -1,4 +1,3 @@
-const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
@@ -23,6 +22,8 @@ const {
 
 app.use(express.static(`main`));
 
+app.use(bodyParser.json());
+
 const ALLOW_LIST = [
   "https://botsketball.com",
   "https://www.botsketball.com",
@@ -31,19 +32,34 @@ const ALLOW_LIST = [
   "http://localhost:3000",
 ];
 
-app.use(bodyParser.json());
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (ALLOW_LIST.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-  })
-);
+// Add CORS headers
+app.use(function (req, res, next) {
+  const origin = req.headers.origin;
+
+  if (ALLOW_LIST.includes(origin)) {
+    // Website you wish to allow to connect
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  // Request methods you wish to allow
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
+  );
+
+  // Request headers you wish to allow
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-Requested-With,content-type"
+  );
+
+  // Set to true if you need the website to include cookies in the requests sent
+  // to the API (e.g. in case you use sessions)
+  res.setHeader("Access-Control-Allow-Credentials", true);
+
+  // Pass to next layer of middleware
+  next();
+});
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
