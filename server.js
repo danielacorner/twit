@@ -21,10 +21,6 @@ const {
   savePlayerScore,
 } = require("./functions/getPlayerScores");
 
-app.use(express.static(`main`));
-
-app.use(bodyParser.json());
-
 const ALLOW_LIST = [
   "https://botsketball.com",
   "https://botsketball.com/",
@@ -42,6 +38,10 @@ app.use(
     origin: ALLOW_LIST,
   })
 );
+
+app.use(express.static(`main`));
+
+app.use(bodyParser.json());
 
 app.get("/", function (req, res) {
   res.sendFile(path.join(__dirname, "index.html"));
