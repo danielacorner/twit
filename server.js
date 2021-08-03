@@ -27,6 +27,7 @@ const ALLOW_LIST = [
   "https://botsketball.com",
   "https://www.botsketball.com",
   "https://botsketball.netlify.app",
+  "https://twitter-viz.netlify.app/",
   "http://localhost:3000",
 ];
 
