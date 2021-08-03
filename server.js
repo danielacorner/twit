@@ -1,4 +1,4 @@
-const cors = require("cors");
+// const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
@@ -11,7 +11,7 @@ const getUserInfo = require("./functions/getUserInfo");
 const streamFilteredTweets = require("./functions/streamFilteredTweets");
 const getTweets = require("./functions/getTweets");
 const getLikes = require("./functions/getLikes");
-const getUserMentions = require("./functions/getUserMentions");
+// const getUserMentions = require("./functions/getUserMentions");
 const generateBotScore = require("./functions/generateBotScore");
 const getRetweeters = require("./functions/getRetweeters");
 const sendBotScoreToDB = require("./functions/sendBotScoreToDB");
@@ -33,11 +33,22 @@ const ALLOW_LIST = [
   "http://localhost:3000",
   "http://localhost:3000/",
 ];
-app.use(
-  cors({
-    origin: ALLOW_LIST,
-  })
-);
+// app.use(
+//   cors({
+//     origin: ALLOW_LIST,
+//   })
+// );
+
+app.use(function (req, res, next) {
+  if (ALLOW_LIST.includes(req.headers.origin)) {
+    res.header("Access-Control-Allow-Origin", "YOUR-DOMAIN.TLD"); // update to match the domain you will make the request from
+  }
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
 
 app.use(express.static(`main`));
 
