@@ -52,6 +52,7 @@ app.get("/", function (req, res) {
 // https://developer.twitter.com/en/docs/twitter-api/v1/tweets/sample-realtime/overview/get_statuses_sample
 app.get("/api/stream", async function (req, res) {
   const filterLevel = req.query.filterLevel;
+  console.log("🌟🚨 ~ filterLevel", filterLevel);
   const allowedMediaTypes =
     req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
   const countryCode = req.query.countryCode;
@@ -62,6 +63,7 @@ app.get("/api/stream", async function (req, res) {
     countryCode,
     lang,
   });
+  // TODO: switch to api/stream/v2
 
   const tweets = await streamTweets({
     numTweets: +req.query.num,
@@ -191,12 +193,10 @@ app.post("/api/generate_bot_score", async function (req, res) {
 
 app.get("/api/highscores", async function (req, res) {
   const highScores = await getPlayerScores();
-  console.log("🌟🚨 ~ highScores", highScores);
 
   res.json(highScores);
 });
 app.post("/api/save_highscore", async function (req, res) {
-  console.log("🌟🚨 ~ req", req);
   const { userId, name, score } = req.body;
   const response = await savePlayerScore({ userId, name, score });
   console.log("🌟🚨 ~ sabehighscore response", response);

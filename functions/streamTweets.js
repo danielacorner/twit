@@ -5,6 +5,7 @@ const { T, sentiment } = require("../utils");
 
 async function streamTweets({ numTweets, filterFn }) {
   return new Promise((resolve, reject) => {
+    // TODO: pass filter into stream v2 https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/quick-start
     const stream = T.stream(`statuses/sample`);
 
     let count = 0;
@@ -15,7 +16,10 @@ async function streamTweets({ numTweets, filterFn }) {
       stream.on("tweet", (tweet) => {
         console.log("🌟🚨 ~ stream.on ~ tweet", tweet.id_str);
         // if the tweet isn't filtered out...
-        if (filterFn && !filterFn(tweet)) {
+        const filteredOut = filterFn && !filterFn(tweet);
+        console.log("🌟🚨 ~ stream.on ~ filteredOut", filteredOut);
+        console.log("🌟🚨 ~ stream.on ~ filterFn", filterFn);
+        if (filteredOut) {
           return;
         }
 
