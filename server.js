@@ -198,6 +198,7 @@ app.get("/api/highscores", async function (req, res) {
 });
 app.post("/api/save_highscore", async function (req, res) {
   const { userId, name, score } = req.body;
+  console.log("🌟🚨 ~ { userId, name, score }", { userId, name, score });
   const response = await savePlayerScore({ userId, name, score });
   console.log("🌟🚨 ~ sabehighscore response", response);
 
