@@ -64,8 +64,11 @@ app.get("/api/stream", async function (req, res) {
   console.log("🌟🚨 ~ filterLevel", filterLevel);
   const allowedMediaTypes =
     req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
+  console.log("🌟🚨 ~ allowedMediaTypes", allowedMediaTypes);
   const countryCode = req.query.countryCode;
+  console.log("🌟🚨 ~ countryCode", countryCode);
   const lang = req.query.lang;
+  console.log("🌟🚨 ~ lang", lang);
   const filterFn = getFilterFn({
     allowedMediaTypes,
     filterLevel,
