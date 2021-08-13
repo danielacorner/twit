@@ -309,10 +309,11 @@ app.listen(process.env.PORT || 8080, () => {
 // https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object
 function getFilterFn({ allowedMediaTypes, filterLevel, countryCode, lang }) {
   return (node) =>
-    filterByMediaType(node, allowedMediaTypes, filterLevel) &&
-    filterByQualityLevel(node, filterLevel) &&
-    filterByLocation(node, countryCode) &&
-    filterByLang(node, lang);
+    (!allowedMediaTypes ||
+      filterByMediaType(node, allowedMediaTypes, filterLevel)) &&
+    (!filterLevel || filterByQualityLevel(node, filterLevel)) &&
+    (!countryCode || filterByLocation(node, countryCode)) &&
+    (!lang || filterByLang(node, lang));
 }
 
 function filterByQualityLevel(node, filterLevel) {
