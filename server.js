@@ -21,7 +21,9 @@ const {
   getPlayerScores,
   savePlayerScore,
 } = require("./functions/getPlayerScores");
-const { getFilteredStreamV2Tweets } = require("./getFilteredStreamV2Tweets");
+const {
+  getFilteredStreamV2Tweets,
+} = require("./functions/getFilteredStreamV2Tweets");
 
 const ALLOW_LIST = [
   "https://botsketball.com",
@@ -204,7 +206,6 @@ app.post("/api/generate_bot_score", async function (req, res) {
   // whenever we generate a bot score
   // send bot score to DB, so we can reliably display nodes with bot scores (botometer api limit)
   // https://docs.fauna.com/fauna/current/cookbook/?lang=javascript#collection-create-document
-  // const user = getOriginalPoster(tweetsByUser[0]);
   sendBotScoreToDB({ ...tweetsByUser[0], botScore });
 
   res.json(botScore);

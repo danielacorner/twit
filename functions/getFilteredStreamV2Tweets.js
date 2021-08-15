@@ -264,7 +264,6 @@ function getFilteredStreamV2Tweets({
                 const user = includes.users.find(
                   (user) => user.id === tweet.author_id
                 );
-                console.log("🌟🚨 ~ streamedTweetsData ~ user", user);
                 return {
                   ...tweet,
                   user,
