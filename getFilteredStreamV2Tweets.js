@@ -22,6 +22,7 @@ async function getAllRules() {
 
 async function deleteAllRules(rules) {
   if (!Array.isArray(rules.data)) {
+    console.log("rules.data must be an array");
     return null;
   }
 
@@ -123,9 +124,18 @@ function getFilteredStreamV2Tweets({
         // tag: "dog pictures",
       },
     ];
-    await deleteAllRules({ id: 1426778339046535200, tag: "cat pictures" });
 
-    const rulesResp = setRules(rules);
+    const deleteResp = await deleteAllRules({
+      data: [
+        {
+          id: 1426778339046535200,
+          tag: "cat pictures",
+        },
+      ],
+    });
+    console.log("🌟🚨🌟🚨🌟🚨 ~ returnnewPromise ~ deleteResp", deleteResp);
+
+    const rulesResp = await setRules(rules);
     console.log("🌟🚨 ~ rulesResp", rulesResp);
 
     // !! specify rules to retrieve tweets mentioning "covid"
@@ -146,11 +156,6 @@ function getFilteredStreamV2Tweets({
           const json = JSON.parse(data);
           console.log(json);
           streamedTweets.push(json);
-          console.log(
-            "🌟🚨 ~ .on ~ streamedTweets.length",
-            streamedTweets.length
-          );
-          console.log("🌟🚨 ~ .on ~ numTweets", numTweets);
           if (streamedTweets.length >= numTweets) {
             stream.destroy();
             resolve(streamedTweets);

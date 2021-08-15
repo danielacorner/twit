@@ -71,7 +71,7 @@ app.get("/api/stream", async function (req, res) {
   const lang = req.query.lang;
   console.log("🌟🚨 ~ lang", lang);
   const numTweets = 10;
-  const tweets = getFilteredStreamV2Tweets({
+  const tweets = await getFilteredStreamV2Tweets({
     allowedMediaTypes,
     filterLevel,
     countryCode,
