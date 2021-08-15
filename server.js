@@ -61,32 +61,36 @@ app.get("/", function (req, res) {
 
 // https://developer.twitter.com/en/docs/twitter-api/v1/tweets/sample-realtime/overview/get_statuses_sample
 app.get("/api/stream", async function (req, res) {
-  const filterLevel = req.query.filterLevel;
-  console.log("🌟🚨 ~ filterLevel", filterLevel);
-  const allowedMediaTypes =
-    req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
-  console.log("🌟🚨 ~ allowedMediaTypes", allowedMediaTypes);
-  const countryCode = req.query.countryCode;
-  console.log("🌟🚨 ~ countryCode", countryCode);
-  const lang = req.query.lang;
-  console.log("🌟🚨 ~ lang", lang);
-  const numTweets = 10;
-  const tweets = await getFilteredStreamV2Tweets({
-    allowedMediaTypes,
-    filterLevel,
-    countryCode,
-    lang,
-    numTweets,
-  });
-  console.log("🌟🚨 ~ tweets", tweets);
-  // TODO: switch to api/stream/v2
+  try {
+    const filterLevel = req.query.filterLevel;
+    console.log("🌟🚨 ~ filterLevel", filterLevel);
+    const allowedMediaTypes =
+      req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
+    console.log("🌟🚨 ~ allowedMediaTypes", allowedMediaTypes);
+    const countryCode = req.query.countryCode;
+    console.log("🌟🚨 ~ countryCode", countryCode);
+    const lang = req.query.lang;
+    console.log("🌟🚨 ~ lang", lang);
+    const numTweets = 10;
+    const tweets = await getFilteredStreamV2Tweets({
+      allowedMediaTypes,
+      filterLevel,
+      countryCode,
+      lang,
+      numTweets,
+    });
+    console.log("🌟🚨 ~ tweets", tweets.length);
+    // TODO: switch to api/stream/v2
 
-  // const tweets = await streamTweets({
-  //   numTweets: +req.query.num,
-  //   filters,
-  // });
+    // const tweets = await streamTweets({
+    //   numTweets: +req.query.num,
+    //   filters,
+    // });
 
-  res.json(tweets);
+    res.json(tweets);
+  } catch (e) {
+    console.log("⚠ err", e);
+  }
 });
 
 app.get("/api/get", async function (req, res) {

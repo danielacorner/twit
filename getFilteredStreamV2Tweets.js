@@ -1,11 +1,11 @@
 // https://github.com/twitterdev/Twitter-API-v2-sample-code/blob/main/Filtered-Stream/filtered_stream.js
 const needle = require("needle");
-const fetch = require("node-fetch");
 const token = process.env.TWITTER_BEARER_TOKEN;
 
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 // https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
-const tweetFieldsArr = [
+// https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/get-tweets-search-stream
+const tweetFields = [
   "id",
   "text",
   "attachments",
@@ -26,10 +26,67 @@ const tweetFieldsArr = [
   "source",
   "promoted_metrics",
 ];
-const tweetFields = `${tweetFieldsArr.join(
-  ","
-)}&expansions=referenced_tweets.id`;
-const streamURL = `https://api.twitter.com/2/tweets/search/stream?tweet.fields=${tweetFields}`;
+const userFields = [
+  "created_at",
+  "description",
+  "entities",
+  "id",
+  "location",
+  "name",
+  "pinned_tweet_id",
+  "profile_image_url",
+  "protected",
+  "public_metrics",
+  "url",
+  "username",
+  "verified",
+  "withheld",
+];
+const mediaFields = [
+  "duration_ms",
+  "height",
+  "media_key",
+  "preview_image_url",
+  "type",
+  "url",
+  "width",
+  "public_metrics",
+  "alt_text",
+];
+const placeFields = [
+  "contained_within",
+  "country",
+  "country_code",
+  "full_name",
+  "geo",
+  "id",
+  "name",
+  "place_type",
+];
+// poll.fields
+
+const tweetExpansions = [
+  "author_id",
+  "referenced_tweets.id",
+  // "attachments.poll_ids",
+  // "attachments.media_keys, author_id",
+  // "entities.mentions.username",
+  // "geo.place_id, in_reply_to_user_id",
+  // "referenced_tweets.id",
+  // "referenced_tweets.id.author_id",
+];
+
+const queryParams = [
+  { key: "tweet.fields", val: tweetFields.join(",") },
+  { key: "expansions", val: tweetExpansions.join(",") },
+  { key: "user.fields", val: userFields.join(",") },
+  { key: "media.fields", val: mediaFields.join(",") },
+  { key: "place.fields", val: placeFields.join(",") },
+];
+const queryString = `?${queryParams
+  .map(({ key, val }) => `${key}=${val}`)
+  .join("&")}`;
+const streamURL = `https://api.twitter.com/2/tweets/search/stream${queryString}`;
 
 async function getAllRules() {
   const response = await needle("get", rulesURL, {
@@ -105,7 +162,7 @@ function streamConnect() {
     },
     function (error, response) {
       if (!error && response.statusCode === 200) {
-        console.log("🌟 ~ streamConnect ~ response.body", response.body);
+        console.log("🌟 ~ streamConnect", response.statusCode);
       } else {
         console.log("🚨 ~ streamConnect ~ error", error);
         console.log("🚨 ~ streamConnect ~ response", response);
@@ -185,17 +242,43 @@ function getFilteredStreamV2Tweets({
     const stream = streamConnect();
 
     const streamedTweets = [];
-    console.log("🌟🚨 ~ returnnewPromise ~ streamedTweets", streamedTweets);
+    console.log(
+      "🌟🚨 ~ returnnewPromise ~ streamedTweets",
+      streamedTweets.length
+    );
 
     stream
       .on("data", (data) => {
         try {
           const json = JSON.parse(data);
-          console.log(json);
+          console.log("🐦 tweet!");
+          // console.log(json);
           streamedTweets.push(json);
           if (streamedTweets.length >= numTweets) {
             stream.destroy();
-            resolve(streamedTweets);
+            // * d.includes =>  The ID that represents the expanded data object will be included directly in the Tweet data object,
+            // * the expanded object metadata will be returned within the includes response object,
+            // * and will also include the ID so that you can match this data object to the original Tweet object.
+            const streamedTweetsData = streamedTweets.map(
+              ({ matching_rules, data: tweet, includes }) => {
+                const user = includes.users.find(
+                  (user) => user.id === tweet.author_id
+                );
+                console.log("🌟🚨 ~ streamedTweetsData ~ user", user);
+                return {
+                  ...tweet,
+                  user,
+                  includes: tweet.includes,
+                  matching_rules,
+                };
+              }
+            );
+            console.log("🌟🚨 ~ .on ~ streamedTweets", streamedTweets.length);
+            console.log(
+              "🌟🚨 ~ .on ~ streamedTweetsData",
+              streamedTweetsData.length
+            );
+            resolve(streamedTweetsData);
           }
           // A successful connection resets retry count.
           // retryAttempt = 0;
