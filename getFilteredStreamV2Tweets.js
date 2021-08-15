@@ -4,7 +4,33 @@ const fetch = require("node-fetch");
 const token = process.env.TWITTER_BEARER_TOKEN;
 
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
-const streamURL = "https://api.twitter.com/2/tweets/search/stream";
+// https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
+const tweetFieldsArr = [
+  "id",
+  "text",
+  "attachments",
+  "author_id",
+  "context_annotations",
+  "conversation_id",
+  "created_at",
+  "entities",
+  "geo",
+  "in_reply_to_user_id",
+  "lang",
+  "possibly_sensitive",
+  "non_public_metrics",
+  "reply_settings",
+  "organic_metrics",
+  "public_metrics",
+  "referenced_tweets",
+  "source",
+  "promoted_metrics",
+];
+const tweetFields = `${tweetFieldsArr.join(
+  ","
+)}&expansions=referenced_tweets.id`;
+const streamURL = `https://api.twitter.com/2/tweets/search/stream?tweet.fields=${tweetFields}`;
+
 async function getAllRules() {
   const response = await needle("get", rulesURL, {
     headers: {
@@ -68,13 +94,24 @@ async function setRules(rules) {
 }
 
 function streamConnect() {
-  const stream = needle.get(streamURL, {
-    headers: {
-      "User-Agent": "v2FilterStreamJS",
-      Authorization: `Bearer ${token}`,
+  const stream = needle.get(
+    streamURL,
+    {
+      headers: {
+        "User-Agent": "v2FilterStreamJS",
+        Authorization: `Bearer ${token}`,
+      },
+      timeout: 20000,
     },
-    timeout: 20000,
-  });
+    function (error, response) {
+      if (!error && response.statusCode === 200) {
+        console.log("🌟 ~ streamConnect ~ response.body", response.body);
+      } else {
+        console.log("🚨 ~ streamConnect ~ error", error);
+        console.log("🚨 ~ streamConnect ~ response", response);
+      }
+    }
+  );
 
   return stream;
 }
@@ -116,6 +153,15 @@ function getFilteredStreamV2Tweets({
     // TODO: if we can only stream one topic at a time, can we save topics and rotate back to them,
     // TODO: then eventually have enough topics stored to allow multiple topics per day
 
+    // const deleteResp = await deleteAllRules({
+    //   data: [
+    //     {
+    //       id: 1426778339046535200,
+    //       tag: "cat pictures",
+    //     },
+    //   ],
+    // });
+
     const rules = [
       {
         value: "covid",
@@ -124,31 +170,22 @@ function getFilteredStreamV2Tweets({
         // tag: "dog pictures",
       },
     ];
-
-    const deleteResp = await deleteAllRules({
-      data: [
-        {
-          id: 1426778339046535200,
-          tag: "cat pictures",
-        },
-      ],
-    });
-    console.log("🌟🚨🌟🚨🌟🚨 ~ returnnewPromise ~ deleteResp", deleteResp);
-
-    const rulesResp = await setRules(rules);
-    console.log("🌟🚨 ~ rulesResp", rulesResp);
+    // ! setRules only needed once
+    // const rulesResp = await setRules(rules);
 
     // !! specify rules to retrieve tweets mentioning "covid"
     // * could rotate this topic daily for replay value!
     // Identify and specify which fields you would like to retrieve
     // If you would like to receive additional fields beyond id and text, you will have to specify those fields in your request with the field and/or expansion parameters.
     // https://api.twitter.com/2/tweets/search/stream?tweet.fields=created_at&expansions=author_id&user.fields=created_at
-    const query =
-      "#nowplaying has:images -is:retweet (horrible OR worst OR sucks OR bad OR disappointing) (place_country:US OR place_country:MX OR place_country:CA) -happy -exciting -excited -favorite -fav -amazing -lovely -incredible";
+
+    // const query =
+    //   "#nowplaying has:images -is:retweet (horrible OR worst OR sucks OR bad OR disappointing) (place_country:US OR place_country:MX OR place_country:CA) -happy -exciting -excited -favorite -fav -amazing -lovely -incredible";
 
     const stream = streamConnect();
 
     const streamedTweets = [];
+    console.log("🌟🚨 ~ returnnewPromise ~ streamedTweets", streamedTweets);
 
     stream
       .on("data", (data) => {
