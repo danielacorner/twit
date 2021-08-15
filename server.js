@@ -21,7 +21,7 @@ const {
   getPlayerScores,
   savePlayerScore,
 } = require("./functions/getPlayerScores");
-const fetch = require("node-fetch");
+const { getFilteredStreamV2Tweets } = require("./getFilteredStreamV2Tweets");
 
 const ALLOW_LIST = [
   "https://botsketball.com",
@@ -59,88 +59,6 @@ app.get("/", function (req, res) {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/quick-start
-function getFilteredStreamV2Tweets({
-  allowedMediaTypes,
-  filterLevel,
-  countryCode,
-  lang,
-}) {
-  // 1. add rules to the stream
-
-  const streamRulesToAddJson = {
-    add: [{ value: "cat has:images", tag: "cats with images" }],
-  };
-
-  // ! this affects the app for all users
-  // * needed one time only?
-  // TODO: perform once when the app mounts
-  // TODO: if we can only stream one topic at a time, can we save topics and rotate back to them,
-  // TODO: then eventually have enough topics stored to allow multiple topics per day
-  fetch(`https://api.twitter.com/2/tweets/search/stream/rules`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
-    },
-    body: JSON.stringify(streamRulesToAddJson),
-  })
-    .then((resp) => resp.json())
-    .then((resp) => {
-      console.log("🌟🚨 ~ rules resp", resp);
-      // resp:
-      // {
-      //   "data": [{
-      //     "id": "1273028376882589696",
-      //     "value": "cat has:images",
-      //     "tag": "cats with images"
-      //   }],
-      //   "meta": {
-      //     "sent": "2020-06-16T23:14:06.498Z"
-      //   }
-      // }
-    })
-    .catch((err) => {
-      console.log("🚨 ~ err", err);
-    });
-
-  // !! specify rules to retrieve tweets mentioning "covid"
-  // * could rotate this topic daily for replay value!
-
-  // Identify and specify which fields you would like to retrieve
-  // If you would like to receive additional fields beyond id and text, you will have to specify those fields in your request with the field and/or expansion parameters.
-  // https://api.twitter.com/2/tweets/search/stream?tweet.fields=created_at&expansions=author_id&user.fields=created_at
-  fetch(
-    `https://api.twitter.com/2/tweets/search/stream?query=%23nowplaying%20(happy%20OR%20exciting%20OR%20excited%20OR%20favorite%20OR%20fav%20OR%20amazing%20OR%20lovely%20OR%20incredible)%20(place_country%3AUS%20OR%20place_country%3AMX%20OR%20place_country%3ACA)%20-horrible%20-worst%20-sucks%20-bad%20-disappointing`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
-      },
-    }
-  )
-    .then((resp) => resp.json())
-
-    .then((resp) => {
-      console.log("🌟🚨 ~ process.env", process.env);
-      console.log("🌟🚨 ~ stream resp", resp);
-      // resp:
-      // {
-      //   "data": [{
-      //     "id": "1273028376882589696",
-      //     "value": "cat has:images",
-      //     "tag": "cats with images"
-      //   }],
-      //   "meta": {
-      //     "sent": "2020-06-16T23:14:06.498Z"
-      //   }
-      // }
-    })
-    .catch((err) => {
-      console.log("🚨 ~ err", err);
-    });
-}
-
 // https://developer.twitter.com/en/docs/twitter-api/v1/tweets/sample-realtime/overview/get_statuses_sample
 app.get("/api/stream", async function (req, res) {
   const filterLevel = req.query.filterLevel;
@@ -152,11 +70,13 @@ app.get("/api/stream", async function (req, res) {
   console.log("🌟🚨 ~ countryCode", countryCode);
   const lang = req.query.lang;
   console.log("🌟🚨 ~ lang", lang);
+  const numTweets = 10;
   const tweets = getFilteredStreamV2Tweets({
     allowedMediaTypes,
     filterLevel,
     countryCode,
     lang,
+    numTweets,
   });
   console.log("🌟🚨 ~ tweets", tweets);
   // TODO: switch to api/stream/v2
