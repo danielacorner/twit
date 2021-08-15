@@ -262,8 +262,36 @@ function getFilteredStreamV2Tweets({
                   ? includes.users.find((user) => user.id === tweet.author_id)
                   : tweet.user;
                 const fullTweet = includes.tweets // replace truncated text with full text
-                  ? includes.tweets.find((t) => t.id === tweet.id)
-                  : tweet;
+                  ? includes.tweets.find((t) => {
+                      const isThisTweet = t.id === tweet.id;
+                      const retweetedTweetMeta = tweet.referenced_tweets.find(
+                        (rt) => rt.type === "retweeted"
+                      );
+                      const isRetweetedTweet =
+                        retweetedTweetMeta && t.id === retweetedTweetMeta.id;
+                      return isThisTweet || isRetweetedTweet;
+                    })
+                  : {};
+
+                if (fullTweet) {
+                  console.log("🌟🚨 ~ .on ~ fullTweet found!", fullTweet.id);
+                } else {
+                  console.log("🌟🚨 ~ not found...");
+                  // console.log("🌟🚨 ~ tweet", tweet);
+
+                  // console.log("🌟🚨 ~ .on ~ includes.tweets", includes.tweets);
+                  // console.log(
+                  //   "🌟🚨 ~ .on ~ includes.tweets",
+                  //   includes.tweets && includes.tweets.map((t) => t.id)
+                  // );
+                }
+
+                // console.log("🌟🚨 ~ .on ~ includes", Object.keys(includes));
+                // console.log(
+                //   "🌟🚨 ~ .on ~ includes.tweets",
+                //   includes.tweets.map((t) => Object.keys(t))
+                //   );
+                // console.log("🌟🚨 ~ .on ~ tweet.id", tweet.id);
 
                 return {
                   ...tweet,
@@ -295,7 +323,7 @@ function getFilteredStreamV2Tweets({
             process.exit(1);
           } else {
             console.log("🌟🚨 ~ .on ~ e", e);
-            console.log("🌟🚨 ~ .on ~ data.detil", data.detil);
+            console.log("🌟🚨 ~ .on ~ data.detail", data.detail);
             stream.destroy();
           }
         }
