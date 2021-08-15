@@ -6,8 +6,6 @@ const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 // https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
 // https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/get-tweets-search-stream
 const tweetFields = [
-  "id",
-  "text",
   "attachments",
   "author_id",
   "context_annotations",
@@ -15,16 +13,16 @@ const tweetFields = [
   "created_at",
   "entities",
   "geo",
+  "id",
   "in_reply_to_user_id",
   "lang",
-  "possibly_sensitive",
-  "non_public_metrics",
-  "reply_settings",
-  "organic_metrics",
   "public_metrics",
+  "possibly_sensitive",
   "referenced_tweets",
+  "reply_settings",
   "source",
-  "promoted_metrics",
+  "text",
+  "withheld",
 ];
 const userFields = [
   "created_at",
