@@ -4,7 +4,6 @@ const bodyParser = require("body-parser");
 const app = express();
 const path = require("path");
 const streamTweets = require("./functions/streamTweets");
-const streamFilteredTweetsV2 = require("./functions/streamFilteredTweetsV2");
 const { FILTER_LEVEL, filterByMediaType } = require("./utils");
 const getTimeline = require("./functions/getTimeline");
 const getSearchResults = require("./functions/getSearchResults");
@@ -115,18 +114,6 @@ app.get("/api/filter", async function (req, res) {
     filterFn,
     locations,
   });
-  res.json(tweets);
-});
-
-// ! unused -- using this would reduce stream usage when filters are applied
-app.get("/api/filter_v2", async function (req, res) {
-  const locations = req.query.locations;
-  const allowedMediaTypes =
-    req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
-  const filterFn = getFilterFn({ allowedMediaTypes });
-
-  const tweets = await streamFilteredTweetsV2();
-  // could put rules here https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query
   res.json(tweets);
 });
 
