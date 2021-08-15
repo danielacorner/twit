@@ -1,17 +1,35 @@
 module.exports = streamTweets;
 const { T, sentiment } = require("../utils");
 
-// stream -> receive continuously
+/** set the filters for twitter filtered stream v2 API https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/quick-start */
+function setStreamFilters() {
+  fetch("https://api.twitter.com/2/tweets/search/stream/rules", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.TWITTER_ACCESS_TOKEN_SECRET}`,
+      // "Authorization": `Bearer ${T.getBearerToken()}`
+    },
+    body: `{
+      "add": [
+        {"value": "cat has:images", "tag": "cats with images"}
+      ]
+    }`,
+  });
+}
 
-async function streamTweets({ numTweets, filterFn }) {
+// stream -> receive continuously
+async function streamTweets({ numTweets, filters }) {
   console.log("🌟🚨 ~ streamTweets ~ numTweets", numTweets);
   return new Promise((resolve, reject) => {
     // TODO: pass filter into stream v2 https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/quick-start
     const stream = T.stream(`statuses/sample`);
 
+    setStreamFilters(filters).then((resp) => {});
+
     let count = 0;
     let attempts = 0;
-    const maxAttemps = numTweets * 3;
+    const maxAttemps = numTweets * 2;
     const tweets = [];
 
     console.log("Streaming tweets 🐦");
