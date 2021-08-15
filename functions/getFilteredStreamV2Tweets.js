@@ -252,19 +252,22 @@ function getFilteredStreamV2Tweets({
           // console.log(json);
           streamedTweets.push(json);
           if (streamedTweets.length >= numTweets) {
-            stream.destroy();
+            console.log("done!");
             // * d.includes =>  The ID that represents the expanded data object will be included directly in the Tweet data object,
             // * the expanded object metadata will be returned within the includes response object,
             // * and will also include the ID so that you can match this data object to the original Tweet object.
             const streamedTweetsData = streamedTweets.map(
               ({ matching_rules, data: tweet, includes }) => {
-                const user = includes.users.find(
-                  (user) => user.id === tweet.author_id
-                );
-                console.log("🌟🚨 ~ .on ~ includes", includes);
+                const user = includes.users
+                  ? includes.users.find((user) => user.id === tweet.author_id)
+                  : tweet.user;
+                const fullTweet = includes.tweets // replace truncated text with full text
+                  ? includes.tweets.find((t) => t.id === tweet.id)
+                  : tweet;
+
                 return {
                   ...tweet,
-                  text: includes.tweets[0].text, // replace truncated text with full text
+                  ...fullTweet,
                   user,
                   includes,
                   matching_rules,
@@ -276,6 +279,8 @@ function getFilteredStreamV2Tweets({
               "🌟🚨 ~ .on ~ streamedTweetsData",
               streamedTweetsData.length
             );
+            stream.destroy();
+            console.log("stream destroyed ✔💣");
             resolve(streamedTweetsData);
           }
           // A successful connection resets retry count.
@@ -286,9 +291,12 @@ function getFilteredStreamV2Tweets({
             "This stream is currently at the maximum allowed connection limit."
           ) {
             console.log(data.detail);
+            stream.destroy();
             process.exit(1);
           } else {
-            // Keep alive signal received. Do nothing.
+            console.log("🌟🚨 ~ .on ~ e", e);
+            console.log("🌟🚨 ~ .on ~ data.detil", data.detil);
+            stream.destroy();
           }
         }
       })
