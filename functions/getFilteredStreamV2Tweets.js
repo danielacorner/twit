@@ -67,11 +67,10 @@ const tweetExpansions = [
   "author_id",
   "referenced_tweets.id",
   // "attachments.poll_ids",
-  // "attachments.media_keys, author_id",
+  // "attachments.media_keys",
   // "entities.mentions.username",
-  // "geo.place_id, in_reply_to_user_id",
-  // "referenced_tweets.id",
-  // "referenced_tweets.id.author_id",
+  // "geo.place_id", "in_reply_to_user_id",
+  "referenced_tweets.id.author_id",
 ];
 
 const queryParams = [
@@ -262,10 +261,12 @@ function getFilteredStreamV2Tweets({
                 const user = includes.users.find(
                   (user) => user.id === tweet.author_id
                 );
+                console.log("🌟🚨 ~ .on ~ includes", includes);
                 return {
                   ...tweet,
+                  text: includes.tweets[0].text, // replace truncated text with full text
                   user,
-                  includes: tweet.includes,
+                  includes,
                   matching_rules,
                 };
               }
