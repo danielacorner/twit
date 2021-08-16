@@ -258,7 +258,10 @@ exports.getFilteredStreamV2Tweets = getFilteredStreamV2Tweets;
 function streamConnectStartFetching({ numTweets, resolve, retryAttempt }) {
   const stream = getStream();
   const streamedTweets = [];
-  console.log("🌟 ~ returnnewPromise ~ streamedTweets", streamedTweets.length);
+  console.log(
+    "🌟 261 ~ returnnewPromise ~ streamedTweets",
+    streamedTweets.length
+  );
   stream
     .on("data", (data) => {
       try {
@@ -277,30 +280,42 @@ function streamConnectStartFetching({ numTweets, resolve, retryAttempt }) {
         // A successful connection resets retry count.
       } catch (e) {
         // // stop streaming
-        // stream.destroy();
-        console.log("🌟 ~ .on ~ error.code", data.code);
-        console.log("🌟 ~ .on ~ error.title", data.title);
+        console.log("🌟 ~ .on ~ data.code", data.code);
+        console.log("🌟 ~ .on ~ data.title", data.title);
         console.log("🌟 ~ .on ~ data.detail", data.detail);
 
         if (
           data.detail ===
           "This stream is currently at the maximum allowed connection limit."
         ) {
-          console.log("🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟");
+          stream.destroy();
+          console.log(
+            "🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟"
+          );
+          setTimeout(() => {
+            console.warn("A connection error occurred. Reconnecting...");
+            streamConnectStartFetching({
+              numTweets,
+              resolve,
+              retryAttempt: ++retryAttempt,
+            });
+          }, 2 ** retryAttempt);
           // process.exit(1);
         }
       }
     })
     .on("err", (error) => {
+      stream.destroy();
+
+      console.log("error.code", error.code);
+      console.log("error.title", error.title);
       if (error.code !== "ECONNRESET") {
-        console.log(error.code);
         process.exit(1);
       } else {
         // This reconnection logic will attempt to reconnect when a disconnection is detected.
         // To avoid rate limits, this logic implements exponential backoff, so the wait time
         // will increase if the client cannot reconnect to the stream.
         setTimeout(() => {
-          console.log(error.code);
           console.warn("A connection error occurred. Reconnecting...");
           streamConnectStartFetching({
             numTweets,
