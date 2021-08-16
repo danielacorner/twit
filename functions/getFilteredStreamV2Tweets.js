@@ -176,6 +176,14 @@ function getStream() {
       } else {
         console.log("🚨🚨🚨 ~ getStream ~ response.code", response.code);
         console.log("🚨🚨🚨 ~ getStream ~ response.body", response.body);
+        console.log("🚨🚨🚨 ~ getStream ~ response.headers", response.headers);
+
+        const msUntilRateLimitReset = response.headers["x-rate-limit-reset"];
+        console.log(
+          "🌟🚨 ~ getStream ~ msUntilRateLimitReset",
+          msUntilRateLimitReset
+        );
+        // TODO: handle rate limit reset if < some #?
       }
     }
   );
