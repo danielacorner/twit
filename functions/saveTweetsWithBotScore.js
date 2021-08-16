@@ -6,7 +6,7 @@ const faunaClient = new faunadb.Client({
 });
 
 function saveTweetsWithBotScore({ appUserId, allTweetsWithBotScore, refId }) {
-  console.log("🌟🚨 ~ saveTweetsWithBotScore ~ sending node to db");
+  console.log("🌟 ~ saveTweetsWithBotScore ~ sending node to db");
 
   // save it in the nodes_with_bot_scores collection for later user
 
@@ -17,10 +17,10 @@ function saveTweetsWithBotScore({ appUserId, allTweetsWithBotScore, refId }) {
       })
     )
     .then((ret) => {
-      console.log("🌟🚨 ~ q.Replace ~ ret", ret);
+      console.log("🌟 ~ q.Replace ~ ret", ret);
     })
     .catch((err) => {
-      console.log("🌟🚨 ~ Replace ~ err", err);
+      console.log("🌟 ~ Replace ~ err", err);
     });
 }
 module.exports = saveTweetsWithBotScore;

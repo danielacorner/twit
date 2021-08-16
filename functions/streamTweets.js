@@ -20,7 +20,7 @@ function setStreamFilters() {
 
 // stream -> receive continuously
 async function streamTweets({ numTweets, filters }) {
-  console.log("🌟🚨 ~ streamTweets ~ numTweets", numTweets);
+  console.log("🌟 ~ streamTweets ~ numTweets", numTweets);
   return new Promise((resolve, reject) => {
     // TODO: pass filter into stream v2 https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/quick-start
     const stream = T.stream(`statuses/sample`);
@@ -36,11 +36,11 @@ async function streamTweets({ numTweets, filters }) {
     try {
       stream.on("tweet", (tweet) => {
         attempts++;
-        console.log("🌟🚨 ~ stream.on ~ tweet", tweet.id_str);
+        console.log("🌟 ~ stream.on ~ tweet", tweet.id_str);
         // if the tweet isn't filtered out...
         const filteredOut = filterFn && !filterFn(tweet);
-        console.log("🌟🚨 ~ stream.on ~ filteredOut", filteredOut);
-        console.log("🌟🚨 ~ stream.on ~ filterFn", filterFn.toString());
+        console.log("🌟 ~ stream.on ~ filteredOut", filteredOut);
+        console.log("🌟 ~ stream.on ~ filterFn", filterFn.toString());
         if (filteredOut) {
           return;
         }

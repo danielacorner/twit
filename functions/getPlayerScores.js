@@ -6,14 +6,14 @@ function getPlayerScores() {
   return faunaClient
     .query(q.Get(q.Collection("player_scores")))
     .then((ret) => {
-      console.log("🌟🚨 ~ .then ~ ret", ret);
+      console.log("🌟 ~ .then ~ ret", ret);
       return ret.data;
     })
     .catch((err) => console.error("Error: %s", err));
 }
 
 function savePlayerScore({ userId, name, score }) {
-  console.log("🌟🚨 ~ savePlayerScore ~ { userId, name, score }", {
+  console.log("🌟 ~ savePlayerScore ~ { userId, name, score }", {
     userId,
     name,
     score,
@@ -27,7 +27,7 @@ function savePlayerScore({ userId, name, score }) {
       )
       // TODO: bad ref?
       .then((ret) => {
-        console.log("🌟🚨 ~ .then ~ ret", ret);
+        console.log("🌟 ~ .then ~ ret", ret);
         return ret.data;
       })
       .catch((err) => console.error("Error: %s", err))

@@ -6,7 +6,7 @@ const faunaClient = new faunadb.Client({
 });
 
 function sendBotScoreToDB(nodeWithBotScore, appUserId) {
-  console.log("🌟🚨 ~ sendBotScoreToDB ~ sending node to db");
+  console.log("🌟 ~ sendBotScoreToDB ~ sending node to db");
 
   // save it in the nodes_with_bot_scores collection for later user
   faunaClient

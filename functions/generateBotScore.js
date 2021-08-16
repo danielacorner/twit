@@ -31,7 +31,7 @@ async function generateBotScore(tweetsByUser, res) {
     axios
       .request(options)
       .then(function (response) {
-        console.log("🌟🚨 ~ response", response.statusText, response.status);
+        console.log("🌟 ~ response", response.statusText, response.status);
         const {
           cap, // Complete Automation Probability (CAP) is the conditional probability that accounts with a score equal to or greater than this are automated; based on inferred language
           // While bot scores are useful for visualization and behavior analysis, they don't provide enough information by themselves to make a judgement about an account. A more meaningful way to interpret a score is to ask: "What are the chances that an account with a bot score higher than this account is human, or automated?" To answer this question, the Botometer API provides the so-called CAP, defined as the probability, according to our models, that an account with this score or greater is controlled by software, i.e., is a bot. (For the statisticians, this conditional probability calculation uses Bayes' theorem to take into account an estimate of the overall prevalence of bots, so as to balance false positives with false negatives.)
@@ -39,7 +39,7 @@ async function generateBotScore(tweetsByUser, res) {
           display_scores,
           raw_scores,
         } = response.data;
-        console.log("🌟🚨 ~ raw_scores", raw_scores);
+        console.log("🌟 ~ raw_scores", raw_scores);
         const { english, universal } = raw_scores;
 
         // * currently we'll only use english
@@ -76,7 +76,7 @@ async function generateBotScore(tweetsByUser, res) {
         });
       })
       .catch(function (error) {
-        console.log("🌟🚨 ~ returnnewPromise ~ error", error);
+        console.log("🌟 ~ returnnewPromise ~ error", error);
       });
   });
 }

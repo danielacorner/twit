@@ -147,7 +147,20 @@ async function setRules(rules) {
   return response.body;
 }
 
-function streamConnect() {
+/** rate limits: https://developer.twitter.com/en/docs/twitter-api/rate-limits#v2-limits */
+// *** requests per 15 minute window
+// * Tweet lookup	- 300
+// * Search Tweets
+// * - Recent - 450
+// * - Full-archive - 300
+// * Filtered stream
+// * - Connecting - 50
+// * - Adding/deleting filters - 450
+// * - Listing filters - 450
+// * Sampled stream	- 50
+// * etc
+// * User lookup	- 300
+function getStream() {
   const stream = needle.get(
     streamURL,
     {
@@ -159,10 +172,10 @@ function streamConnect() {
     },
     function (error, response) {
       if (!error && response.statusCode === 200) {
-        console.log("🌟 ~ streamConnect", response.statusCode);
+        console.log("🌟 ~ getStream", response.statusCode);
       } else {
-        console.log("🚨 ~ streamConnect ~ error", error);
-        console.log("🚨 ~ streamConnect ~ response", response);
+        console.log("🚨🚨🚨 ~ getStream ~ response.code", response.code);
+        console.log("🚨🚨🚨 ~ getStream ~ response.body", response.body);
       }
     }
   );
@@ -236,113 +249,111 @@ function getFilteredStreamV2Tweets({
     // const query =
     //   "#nowplaying has:images -is:retweet (horrible OR worst OR sucks OR bad OR disappointing) (place_country:US OR place_country:MX OR place_country:CA) -happy -exciting -excited -favorite -fav -amazing -lovely -incredible";
 
-    const stream = streamConnect();
-
-    const streamedTweets = [];
-    console.log(
-      "🌟🚨 ~ returnnewPromise ~ streamedTweets",
-      streamedTweets.length
-    );
-
-    stream
-      .on("data", (data) => {
-        try {
-          const json = JSON.parse(data);
-          console.log("🐦 tweet!");
-          // console.log(json);
-          streamedTweets.push(json);
-          if (streamedTweets.length >= numTweets) {
-            console.log("done!");
-            // * d.includes =>  The ID that represents the expanded data object will be included directly in the Tweet data object,
-            // * the expanded object metadata will be returned within the includes response object,
-            // * and will also include the ID so that you can match this data object to the original Tweet object.
-            const streamedTweetsData = streamedTweets.map(
-              ({ matching_rules, data: tweet, includes }) => {
-                const user = includes.users
-                  ? includes.users.find((user) => user.id === tweet.author_id)
-                  : tweet.user;
-                const fullTweet = includes.tweets // replace truncated text with full text
-                  ? includes.tweets.find((t) => {
-                      const isThisTweet = t.id === tweet.id;
-                      const retweetedTweetMeta = tweet.referenced_tweets.find(
-                        (rt) => rt.type === "retweeted"
-                      );
-                      const isRetweetedTweet =
-                        retweetedTweetMeta && t.id === retweetedTweetMeta.id;
-                      return isThisTweet || isRetweetedTweet;
-                    })
-                  : {};
-
-                if (fullTweet) {
-                  console.log("🌟🚨 ~ .on ~ fullTweet found!", fullTweet.id);
-                } else {
-                  console.log("🌟🚨 ~ not found...");
-                  // console.log("🌟🚨 ~ tweet", tweet);
-
-                  // console.log("🌟🚨 ~ .on ~ includes.tweets", includes.tweets);
-                  // console.log(
-                  //   "🌟🚨 ~ .on ~ includes.tweets",
-                  //   includes.tweets && includes.tweets.map((t) => t.id)
-                  // );
-                }
-
-                // console.log("🌟🚨 ~ .on ~ includes", Object.keys(includes));
-                // console.log(
-                //   "🌟🚨 ~ .on ~ includes.tweets",
-                //   includes.tweets.map((t) => Object.keys(t))
-                //   );
-                // console.log("🌟🚨 ~ .on ~ tweet.id", tweet.id);
-
-                return {
-                  ...tweet,
-                  ...fullTweet,
-                  user,
-                  includes,
-                  matching_rules,
-                };
-              }
-            );
-            console.log("🌟🚨 ~ .on ~ streamedTweets", streamedTweets.length);
-            console.log(
-              "🌟🚨 ~ .on ~ streamedTweetsData",
-              streamedTweetsData.length
-            );
-            stream.destroy();
-            console.log("stream destroyed ✔💣");
-            resolve(streamedTweetsData);
-          }
-          // A successful connection resets retry count.
-          // retryAttempt = 0;
-        } catch (e) {
-          if (
-            data.detail ===
-            "This stream is currently at the maximum allowed connection limit."
-          ) {
-            console.log(data.detail);
-            stream.destroy();
-            process.exit(1);
-          } else {
-            console.log("🌟🚨 ~ .on ~ e", e);
-            console.log("🌟🚨 ~ .on ~ data.detail", data.detail);
-            stream.destroy();
-          }
-        }
-      })
-      .on("err", (error) => {
-        if (error.code !== "ECONNRESET") {
-          console.log(error.code);
-          process.exit(1);
-        } else {
-          // This reconnection logic will attempt to reconnect when a disconnection is detected.
-          // To avoid rate limits, this logic implements exponential backoff, so the wait time
-          // will increase if the client cannot reconnect to the stream.
-          // setTimeout(() => {
-          //   console.warn("A connection error occurred. Reconnecting...");
-          //   streamConnect(++retryAttempt);
-          // }, 2 ** retryAttempt);
-        }
-      });
+    streamConnectStartFetching({ numTweets, resolve, retryAttempt: 0 });
   });
 }
 
 exports.getFilteredStreamV2Tweets = getFilteredStreamV2Tweets;
+
+function streamConnectStartFetching({ numTweets, resolve, retryAttempt }) {
+  const stream = getStream();
+  const streamedTweets = [];
+  console.log("🌟 ~ returnnewPromise ~ streamedTweets", streamedTweets.length);
+  stream
+    .on("data", (data) => {
+      try {
+        const json = JSON.parse(data);
+        console.log("🐦 tweet!");
+        // console.log(json);
+        streamedTweets.push(json);
+        if (streamedTweets.length >= numTweets) {
+          // stop streaming
+          stream.destroy();
+
+          const streamedTweetsData = streamedTweets.map(mapStreamedTweets);
+          console.log("done! stream destroyed ✔💣");
+          resolve(streamedTweetsData);
+        }
+        // A successful connection resets retry count.
+      } catch (e) {
+        // // stop streaming
+        // stream.destroy();
+        console.log("🌟 ~ .on ~ error.code", data.code);
+        console.log("🌟 ~ .on ~ error.title", data.title);
+        console.log("🌟 ~ .on ~ data.detail", data.detail);
+
+        if (
+          data.detail ===
+          "This stream is currently at the maximum allowed connection limit."
+        ) {
+          console.log("🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟");
+          // process.exit(1);
+        }
+      }
+    })
+    .on("err", (error) => {
+      if (error.code !== "ECONNRESET") {
+        console.log(error.code);
+        process.exit(1);
+      } else {
+        // This reconnection logic will attempt to reconnect when a disconnection is detected.
+        // To avoid rate limits, this logic implements exponential backoff, so the wait time
+        // will increase if the client cannot reconnect to the stream.
+        setTimeout(() => {
+          console.log(error.code);
+          console.warn("A connection error occurred. Reconnecting...");
+          streamConnectStartFetching({
+            numTweets,
+            resolve,
+            retryAttempt: ++retryAttempt,
+          });
+        }, 2 ** retryAttempt);
+      }
+    });
+}
+
+function mapStreamedTweets({ matching_rules, data: tweet, includes }) {
+  // * d.includes =>  The ID that represents the expanded data object will be included directly in the Tweet data object,
+  // * the expanded object metadata will be returned within the includes response object,
+  // * and will also include the ID so that you can match this data object to the original Tweet object.
+  const user = includes.users
+    ? includes.users.find((user) => user.id === tweet.author_id)
+    : tweet.user;
+  const fullTweet = includes.tweets // replace truncated text with full text
+    ? includes.tweets.find((t) => {
+        const isThisTweet = t.id === tweet.id;
+        const retweetedTweetMeta = tweet.referenced_tweets.find(
+          (rt) => rt.type === "retweeted"
+        );
+        const isRetweetedTweet =
+          retweetedTweetMeta && t.id === retweetedTweetMeta.id;
+        return isThisTweet || isRetweetedTweet;
+      })
+    : {};
+
+  if (fullTweet) {
+    console.log("🌟 ~ .on ~ fullTweet found!", fullTweet.id);
+  } else {
+    console.log("🌟 ~ not found...");
+    console.log("🌟 ~ tweet", tweet);
+    console.log("🌟 ~ .on ~ includes.tweets", includes.tweets);
+    // console.log(
+    //   "🌟 ~ .on ~ includes.tweets",
+    //   includes.tweets && includes.tweets.map((t) => t.id)
+    // );
+  }
+
+  // console.log("🌟 ~ .on ~ includes", Object.keys(includes));
+  // console.log(
+  //   "🌟 ~ .on ~ includes.tweets",
+  //   includes.tweets.map((t) => Object.keys(t))
+  //   );
+  // console.log("🌟 ~ .on ~ tweet.id", tweet.id);
+  return {
+    ...tweet,
+    ...fullTweet,
+    user,
+    includes,
+    matching_rules,
+  };
+}

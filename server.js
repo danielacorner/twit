@@ -64,14 +64,14 @@ app.get("/", function (req, res) {
 app.get("/api/stream", async function (req, res) {
   try {
     const filterLevel = req.query.filterLevel;
-    console.log("🌟🚨 ~ filterLevel", filterLevel);
+    console.log("🌟 ~ filterLevel", filterLevel);
     const allowedMediaTypes =
       req.query.allowedMediaTypes && req.query.allowedMediaTypes.split(",");
-    console.log("🌟🚨 ~ allowedMediaTypes", allowedMediaTypes);
+    console.log("🌟 ~ allowedMediaTypes", allowedMediaTypes);
     const countryCode = req.query.countryCode;
-    console.log("🌟🚨 ~ countryCode", countryCode);
+    console.log("🌟 ~ countryCode", countryCode);
     const lang = req.query.lang;
-    console.log("🌟🚨 ~ lang", lang);
+    console.log("🌟 ~ lang", lang);
     const numTweets = 10;
     const tweets = await getFilteredStreamV2Tweets({
       allowedMediaTypes,
@@ -80,7 +80,7 @@ app.get("/api/stream", async function (req, res) {
       lang,
       numTweets,
     });
-    console.log("🌟🚨 ~ tweets", tweets.length);
+    console.log("🌟 ~ tweets", tweets.length);
     // TODO: switch to api/stream/v2
 
     // const tweets = await streamTweets({
@@ -205,9 +205,9 @@ app.get("/api/highscores", async function (req, res) {
 });
 app.post("/api/save_highscore", async function (req, res) {
   const { userId, name, score } = req.body;
-  console.log("🌟🚨 ~ { userId, name, score }", { userId, name, score });
+  console.log("🌟 ~ { userId, name, score }", { userId, name, score });
   const response = await savePlayerScore({ userId, name, score });
-  console.log("🌟🚨 ~ sabehighscore response", response);
+  console.log("🌟 ~ sabehighscore response", response);
 
   res.json(response);
 });
@@ -242,7 +242,7 @@ app.get("/api/retweets", async function (req, res) {
   // working example:
   // const id_str = "1316624321754796034";
   const id_str = req.query.id_str;
-  console.log("🌟🚨: id_str", id_str);
+  console.log("🌟: id_str", id_str);
   const screen_name = req.query.screen_name;
   const numTweets = req.query.num;
   const allowedMediaTypes =
