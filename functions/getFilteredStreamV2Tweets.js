@@ -183,6 +183,14 @@ function getStream() {
           "🌟🚨 ~ getStream ~ msUntilRateLimitReset",
           msUntilRateLimitReset
         );
+        console.log(
+          "🌟🚨 ~ getStream ~ hoursUntilRateLimitReset",
+          msUntilRateLimitReset / 1000 / 60 / 60
+        );
+        console.log(
+          "🌟🚨 ~ getStream ~ daysUntilRateLimitReset",
+          msUntilRateLimitReset / 1000 / 60 / 60 / 24
+        );
         // TODO: handle rate limit reset if < some #?
       }
     }
