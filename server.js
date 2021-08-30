@@ -3,7 +3,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 const path = require("path");
-const streamTweets = require("./functions/streamTweets");
 const { FILTER_LEVEL, filterByMediaType } = require("./utils");
 const getTimeline = require("./functions/getTimeline");
 const getSearchResults = require("./functions/getSearchResults");
@@ -81,12 +80,6 @@ app.get("/api/stream", async function (req, res) {
       numTweets,
     });
     console.log("🌟 ~ tweets", tweets.length);
-    // TODO: switch to api/stream/v2
-
-    // const tweets = await streamTweets({
-    //   numTweets: +req.query.num,
-    //   filters,
-    // });
 
     res.json(tweets);
   } catch (e) {
