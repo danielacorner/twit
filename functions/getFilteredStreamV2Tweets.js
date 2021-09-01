@@ -191,6 +191,7 @@ function getStream() {
           "🌟🚨 ~ getStream ~ daysUntilRateLimitReset",
           msUntilRateLimitReset / 1000 / 60 / 60 / 24
         );
+        return { msUntilRateLimitReset };
         // TODO: handle rate limit reset if < some #?
       }
     }
@@ -254,7 +255,8 @@ function getFilteredStreamV2Tweets({
       },
     ];
     // ! setRules only needed once
-    // const rulesResp = await setRules(rules);
+    const rulesResp = await setRules(rules);
+    console.log("🌟🚨 ~ returnnewPromise ~ rulesResp", rulesResp);
 
     // !! specify rules to retrieve tweets mentioning "covid"
     // * could rotate this topic daily for replay value!
@@ -305,12 +307,13 @@ function streamConnectStartFetching({ numTweets, resolve, retryAttempt }) {
           "This stream is currently at the maximum allowed connection limit."
         ) {
           stream.destroy();
+          console.log("🌟🚨 ~ .on ~ retryAttempt", retryAttempt);
           console.log(
             `destroyed stream, reconnecting in ${Math.round(
               2 ** retryAttempt / 1000
             )} s 🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟`
           );
-          if (retryAttempt > 14) {
+          if (retryAttempt > 13) {
             return;
           }
           setTimeout(() => {

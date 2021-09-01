@@ -1,10 +1,67 @@
 const getTimeline = require("./getTimeline");
 const axios = require("axios").default;
 
+const EMPTY_USER = {
+  id: 0,
+  id_str: "",
+  name: "",
+  username: "",
+  screen_name: "",
+  public_metrics: {
+    followers_count: 0,
+    following_count: 0,
+    tweet_count: 0,
+    listed_count: 0,
+  },
+  isNotABot: null,
+  botScore: null,
+  pinned_tweet_id: "",
+  hiddenBotScore: null,
+  location: null | "",
+  url: null | "",
+  description: null | "",
+  translator_type: null,
+  protected: null,
+  verified: null,
+  followers_count: 0,
+  friends_count: 0,
+  listed_count: 0,
+  favourites_count: 0,
+  statuses_count: 0,
+  created_at: "",
+  utc_offset: null,
+  time_zone: null,
+  geo_enabled: null,
+  lang: null,
+  contributors_enabled: null,
+  is_translator: null,
+  profile_background_color: "",
+  profile_background_image_url: "",
+  profile_background_image_url_https: "",
+  profile_background_tile: null,
+  profile_link_color: "#555",
+  profile_sidebar_border_color: "#eaeaea",
+  profile_sidebar_fill_color: "#eaeaea",
+  profile_text_color: "#000",
+  profile_use_background_image: null,
+  profile_image_url: "",
+  profile_image_url_https: "",
+  profile_banner_url: "",
+  default_profile: null,
+  default_profile_image: null,
+  following: null,
+  follow_request_sent: null,
+  notifications: null,
+};
+
 async function generateBotScore(tweetsByUser, res) {
   return new Promise(async (resolve, reject) => {
     const user = tweetsByUser[0].user;
-
+    console.log("🌟🚨 ~ returnnewPromise ~ user", user);
+    if (!user) {
+      console.log("🚨 ~ NO USER", user);
+      return;
+    }
     // * fetch ~50? tweets for user, then pass them into timeline here
     const TWEETS_TO_FETCH = 200;
     const timeline = await getTimeline({
@@ -21,7 +78,12 @@ async function generateBotScore(tweetsByUser, res) {
         "x-rapidapi-host": "botometer-pro.p.rapidapi.com",
         "x-rapidapi-key": process.env.BOTOMETER_RAPIDAPI_KEY,
       },
-      data: { mentions: [], timeline, user },
+      data: {
+        mentions: [],
+        timeline,
+        // api v2 user is missing some data like banner image url, botometer requires a full user objest
+        user: { ...EMPTY_USER, user },
+      },
     };
 
     // https://botometer.osome.iu.edu/faq
