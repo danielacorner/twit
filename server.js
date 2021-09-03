@@ -83,7 +83,7 @@ app.get("/api/stream", async function (req, res) {
       lang,
       numTweets,
     });
-    console.log("🌟 ~ tweets", tweets.length);
+    console.log("🌟 ~ tweets", tweets && tweets.length);
     console.log("🌟🚨 ~ msUntilRateLimitReset", msUntilRateLimitReset);
     console.log(
       "🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨🌟🚨 ~ RESPONSE",
