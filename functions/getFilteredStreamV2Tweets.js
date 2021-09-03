@@ -160,7 +160,10 @@ async function setRules(rules) {
 // * Sampled stream	- 50
 // * etc
 // * User lookup	- 300
-function getStream() {
+function getStream({ resolve }) {
+  let errorRet = null;
+  let msUntilRateLimitResetRet = null;
+
   const stream = needle.get(
     streamURL,
     {
@@ -174,11 +177,13 @@ function getStream() {
       if (!error && response.statusCode === 200) {
         console.log("🌟 ~ getStream", response.statusCode);
       } else {
+        errorRet = error;
         console.log("🚨🚨🚨 ~ getStream ~ response.code", response.code);
         console.log("🚨🚨🚨 ~ getStream ~ response.body", response.body);
         console.log("🚨🚨🚨 ~ getStream ~ response.headers", response.headers);
 
         const msUntilRateLimitReset = response.headers["x-rate-limit-reset"];
+        msUntilRateLimitResetRet = msUntilRateLimitReset;
         console.log(
           "🌟🚨 ~ getStream ~ msUntilRateLimitReset",
           msUntilRateLimitReset
@@ -191,13 +196,22 @@ function getStream() {
           "🌟🚨 ~ getStream ~ daysUntilRateLimitReset",
           msUntilRateLimitReset / 1000 / 60 / 60 / 24
         );
-        return { msUntilRateLimitReset };
+        resolve({ data: null, error: errorRet, msUntilRateLimitReset });
         // TODO: handle rate limit reset if < some #?
       }
     }
   );
 
-  return stream;
+  console.log(
+    "🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 ~ getStream ~ msUntilRateLimitResetRet",
+    msUntilRateLimitResetRet
+  );
+
+  return {
+    stream,
+    error: errorRet,
+    msUntilRateLimitReset: msUntilRateLimitResetRet,
+  };
 }
 
 // (async () => {
@@ -267,19 +281,29 @@ function getFilteredStreamV2Tweets({
     // const query =
     //   "#nowplaying has:images -is:retweet (horrible OR worst OR sucks OR bad OR disappointing) (place_country:US OR place_country:MX OR place_country:CA) -happy -exciting -excited -favorite -fav -amazing -lovely -incredible";
 
-    streamConnectStartFetching({ numTweets, resolve, retryAttempt: 0 });
+    streamConnectStartFetching({ numTweets, resolve, reject, retryAttempt: 0 });
   });
 }
 
 exports.getFilteredStreamV2Tweets = getFilteredStreamV2Tweets;
 
-function streamConnectStartFetching({ numTweets, resolve, retryAttempt }) {
-  const stream = getStream();
-  const streamedTweets = [];
+function streamConnectStartFetching({
+  numTweets,
+  resolve,
+  reject,
+  retryAttempt,
+}) {
+  const { stream, error, msUntilRateLimitReset } = getStream({ resolve });
+  console.log("🌟🚨 ~ msUntilRateLimitReset", msUntilRateLimitReset);
+  if (error) {
+    resolve({ data: null, error, msUntilRateLimitReset });
+  }
   console.log(
-    "🌟 261 ~ returnnewPromise ~ streamedTweets",
-    streamedTweets.length
+    "🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 ~ streamConnectStartFetching ~ error",
+    error
   );
+  const streamedTweets = [];
+  console.log("🌟 261 ~ returnnewPromise ~ streamedTweets = []");
   stream
     .on("data", (data) => {
       try {
@@ -293,7 +317,11 @@ function streamConnectStartFetching({ numTweets, resolve, retryAttempt }) {
 
           const streamedTweetsData = streamedTweets.map(mapStreamedTweets);
           console.log("done! stream destroyed ✔💣");
-          resolve(streamedTweetsData);
+          resolve({
+            data: streamedTweetsData,
+            error: null,
+            msUntilRateLimitReset,
+          });
         }
         // A successful connection resets retry count.
       } catch (e) {
@@ -313,24 +341,25 @@ function streamConnectStartFetching({ numTweets, resolve, retryAttempt }) {
               2 ** retryAttempt / 1000
             )} s 🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟`
           );
-          if (retryAttempt > 13) {
-            return;
-          }
-          setTimeout(() => {
-            console.warn("A connection error occurred. Reconnecting...");
-            streamConnectStartFetching({
-              numTweets,
-              resolve,
-              retryAttempt: ++retryAttempt,
-            });
-          }, 2 ** retryAttempt);
+          resolve({ error: data, data: null, msUntilRateLimitReset });
+          // if (retryAttempt > 13) {
+          //   return;
+          // }
+          // setTimeout(() => {
+          //   console.warn("A connection error occurred. Reconnecting...");
+          //   streamConnectStartFetching({
+          //     numTweets,
+          //     resolve,
+          //     retryAttempt: ++retryAttempt,
+          //   });
+          // }, 2 ** retryAttempt);
           // process.exit(1);
         }
       }
     })
     .on("err", (error) => {
       stream.destroy();
-
+      resolve({ error, data: null, msUntilRateLimitReset });
       console.log("error.code", error.code);
       console.log("error.title", error.title);
       if (error.code !== "ECONNRESET") {
