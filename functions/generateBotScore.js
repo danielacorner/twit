@@ -56,7 +56,7 @@ const EMPTY_USER = {
 
 async function generateBotScore(tweetsByUser, res) {
 	return new Promise(async (resolve, reject) => {
-		const user = tweetsByUser[0].user;
+		const user = tweetsByUser[0] && tweetsByUser[0].user;
 		console.log("🌟🚨 ~ returnnewPromise ~ user", user);
 
 		// * fetch ~50? tweets for user, then pass them into timeline here
@@ -91,8 +91,8 @@ async function generateBotScore(tweetsByUser, res) {
 			},
 		};
 		console.log(
-			"🌟🚨 ~ file: generateBotScore.js ~ line 95 ~ returnnewPromise ~ timeline[0]",
-			timeline[0]
+			"🌟🚨 ~ file: generateBotScore.js ~ line 95 ~ returnnewPromise ~ timeline[0].user",
+			timeline[0] && timeline[0].user
 		);
 
 		// https://botometer.osome.iu.edu/faq
