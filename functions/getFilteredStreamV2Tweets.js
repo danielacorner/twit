@@ -1,150 +1,76 @@
 // https://github.com/twitterdev/Twitter-API-v2-sample-code/blob/main/Filtered-Stream/filtered_stream.js
 const needle = require("needle");
+const {
+  getTwitterApiUrlQueryString,
+} = require("./getTwitterApiUrlQueryString");
 const token = process.env.TWITTER_BEARER_TOKEN;
 
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 // https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
 // https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/get-tweets-search-stream
-const tweetFields = [
-	"attachments",
-	"author_id",
-	"context_annotations",
-	"conversation_id",
-	"created_at",
-	"entities",
-	"geo",
-	"id",
-	"in_reply_to_user_id",
-	"lang",
-	"public_metrics",
-	"possibly_sensitive",
-	"referenced_tweets",
-	"reply_settings",
-	"source",
-	"text",
-	"withheld",
-];
-const userFields = [
-	"created_at",
-	"description",
-	"entities",
-	"id",
-	"location",
-	"name",
-	"pinned_tweet_id",
-	"profile_image_url",
-	"protected",
-	"public_metrics",
-	"url",
-	"username",
-	"verified",
-	"withheld",
-];
-const mediaFields = [
-	"duration_ms",
-	"height",
-	"media_key",
-	"preview_image_url",
-	"type",
-	"url",
-	"width",
-	"public_metrics",
-	"alt_text",
-];
-const placeFields = [
-	"contained_within",
-	"country",
-	"country_code",
-	"full_name",
-	"geo",
-	"id",
-	"name",
-	"place_type",
-];
-// poll.fields
-
-const tweetExpansions = [
-	"author_id",
-	"referenced_tweets.id",
-	// "attachments.poll_ids",
-	// "attachments.media_keys",
-	// "entities.mentions.username",
-	// "geo.place_id", "in_reply_to_user_id",
-	"referenced_tweets.id.author_id",
-];
-
-const queryParams = [
-	{ key: "tweet.fields", val: tweetFields.join(",") },
-	{ key: "expansions", val: tweetExpansions.join(",") },
-	{ key: "user.fields", val: userFields.join(",") },
-	{ key: "media.fields", val: mediaFields.join(",") },
-	{ key: "place.fields", val: placeFields.join(",") },
-];
-const queryString = `?${queryParams
-	.map(({ key, val }) => `${key}=${val}`)
-	.join("&")}`;
+const queryString = getTwitterApiUrlQueryString();
 const streamURL = `https://api.twitter.com/2/tweets/search/stream${queryString}`;
 
 async function getAllRules() {
-	const response = await needle("get", rulesURL, {
-		headers: {
-			authorization: `Bearer ${token}`,
-		},
-	});
+  const response = await needle("get", rulesURL, {
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  });
 
-	if (response.statusCode !== 200) {
-		console.log("Error:", response.statusMessage, response.statusCode);
-		throw new Error(response.body);
-	}
+  if (response.statusCode !== 200) {
+    console.log("Error:", response.statusMessage, response.statusCode);
+    throw new Error(response.body);
+  }
 
-	return response.body;
+  return response.body;
 }
 
 async function deleteAllRules(rules) {
-	if (!Array.isArray(rules.data)) {
-		console.log("rules.data must be an array");
-		return null;
-	}
+  if (!Array.isArray(rules.data)) {
+    console.log("rules.data must be an array");
+    return null;
+  }
 
-	const ids = rules.data.map((rule) => rule.id);
+  const ids = rules.data.map((rule) => rule.id);
 
-	const data = {
-		delete: {
-			ids: ids,
-		},
-	};
+  const data = {
+    delete: {
+      ids: ids,
+    },
+  };
 
-	const response = await needle("post", rulesURL, data, {
-		headers: {
-			"content-type": "application/json",
-			authorization: `Bearer ${token}`,
-		},
-	});
+  const response = await needle("post", rulesURL, data, {
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${token}`,
+    },
+  });
 
-	if (response.statusCode !== 200) {
-		throw new Error(response.body);
-	}
+  if (response.statusCode !== 200) {
+    throw new Error(response.body);
+  }
 
-	return response.body;
+  return response.body;
 }
 
 async function setRules(rules) {
-	const data = {
-		add: rules,
-	};
+  const data = {
+    add: rules,
+  };
 
-	const response = await needle("post", rulesURL, data, {
-		headers: {
-			"content-type": "application/json",
-			authorization: `Bearer ${token}`,
-		},
-	});
+  const response = await needle("post", rulesURL, data, {
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${token}`,
+    },
+  });
 
-	if (response.statusCode !== 201) {
-		throw new Error(response.body);
-	}
+  if (response.statusCode !== 201) {
+    throw new Error(response.body);
+  }
 
-	return response.body;
+  return response.body;
 }
 
 /** rate limits: https://developer.twitter.com/en/docs/twitter-api/rate-limits#v2-limits */
@@ -161,58 +87,58 @@ async function setRules(rules) {
 // * etc
 // * User lookup	- 300
 function getStream({ resolve }) {
-	let errorRet = null;
-	let msUntilRateLimitResetRet = null;
+  let errorRet = null;
+  let msUntilRateLimitResetRet = null;
 
-	const stream = needle.get(
-		streamURL,
-		{
-			headers: {
-				"User-Agent": "v2FilterStreamJS",
-				Authorization: `Bearer ${token}`,
-			},
-			timeout: 20000,
-		},
-		function (error, response) {
-			if (!error && response.statusCode === 200) {
-				console.log("🌟 ~ getStream", response.statusCode);
-			} else {
-				errorRet = error;
-				console.log("🚨🚨🚨 ~ getStream ~ response.code", response.code);
-				console.log("🚨🚨🚨 ~ getStream ~ response.body", response.body);
-				console.log("🚨🚨🚨 ~ getStream ~ response.headers", response.headers);
+  const stream = needle.get(
+    streamURL,
+    {
+      headers: {
+        "User-Agent": "v2FilterStreamJS",
+        Authorization: `Bearer ${token}`,
+      },
+      timeout: 20000,
+    },
+    function (error, response) {
+      if (!error && response.statusCode === 200) {
+        console.log("🌟 ~ getStream", response.statusCode);
+      } else {
+        errorRet = error;
+        console.log("🚨🚨🚨 ~ getStream ~ response.code", response.code);
+        console.log("🚨🚨🚨 ~ getStream ~ response.body", response.body);
+        console.log("🚨🚨🚨 ~ getStream ~ response.headers", response.headers);
 
-				const msUntilRateLimitReset = response.headers["x-rate-limit-reset"];
-				msUntilRateLimitResetRet = msUntilRateLimitReset;
-				console.log(
-					"🌟🚨 ~ getStream ~ msUntilRateLimitReset",
-					msUntilRateLimitReset
-				);
-				console.log(
-					"🌟🚨 ~ getStream ~ hoursUntilRateLimitReset",
-					msUntilRateLimitReset / 1000 / 60 / 60
-				);
-				console.log(
-					"🌟🚨 ~ getStream ~ daysUntilRateLimitReset",
-					msUntilRateLimitReset / 1000 / 60 / 60 / 24
-				);
-				resolve({ data: null, error: errorRet, msUntilRateLimitReset });
-				// TODO: handle rate limit reset if < some #?
-			}
-		}
-	);
+        const msUntilRateLimitReset = response.headers["x-rate-limit-reset"];
+        msUntilRateLimitResetRet = msUntilRateLimitReset;
+        console.log(
+          "🌟🚨 ~ getStream ~ msUntilRateLimitReset",
+          msUntilRateLimitReset
+        );
+        console.log(
+          "🌟🚨 ~ getStream ~ hoursUntilRateLimitReset",
+          msUntilRateLimitReset / 1000 / 60 / 60
+        );
+        console.log(
+          "🌟🚨 ~ getStream ~ daysUntilRateLimitReset",
+          msUntilRateLimitReset / 1000 / 60 / 60 / 24
+        );
+        resolve({ data: null, error: errorRet, msUntilRateLimitReset });
+        // TODO: handle rate limit reset if < some #?
+      }
+    }
+  );
 
-	console.log(
-		"🌟🚨🚨🚨🚨🚨🚨 ~ getStream ~ msUntilRateLimitResetRet",
-		msUntilRateLimitResetRet
-	);
-	console.log("🌟", stream);
+  console.log(
+    "🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 ~ getStream ~ msUntilRateLimitResetRet",
+    msUntilRateLimitResetRet
+  );
+  // console.log("🌟", stream);
 
-	return {
-		stream,
-		error: errorRet,
-		msUntilRateLimitReset: msUntilRateLimitResetRet,
-	};
+  return {
+    stream,
+    error: errorRet,
+    msUntilRateLimitReset: msUntilRateLimitResetRet,
+  };
 }
 
 // (async () => {
@@ -238,221 +164,217 @@ function getStream({ resolve }) {
 
 // https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/quick-start
 function getFilteredStreamV2Tweets({
-	allowedMediaTypes,
-	filterLevel,
-	countryCode,
-	lang,
-	numTweets,
+  allowedMediaTypes,
+  filterLevel,
+  countryCode,
+  lang,
+  numTweets,
 }) {
-	return new Promise(async (resolve, reject) => {
-		// 1. add rules to the stream
-		// ! this affects the app for all users
-		// * needed one time only?
-		// TODO: perform once when the app mounts
-		// TODO: if we can only stream one topic at a time, can we save topics and rotate back to them,
-		// TODO: then eventually have enough topics stored to allow multiple topics per day
+  return new Promise(async (resolve, reject) => {
+    // 1. add rules to the stream
+    // ! this affects the app for all users
+    // * needed one time only?
+    // TODO: perform once when the app mounts
+    // TODO: if we can only stream one topic at a time, can we save topics and rotate back to them,
+    // TODO: then eventually have enough topics stored to allow multiple topics per day
 
-		// const deleteResp = await deleteAllRules({
-		//   data: [
-		//     {
-		//       id: 1426778339046535200,
-		//       tag: "cat pictures",
-		//     },
-		//   ],
-		// });
+    // const deleteResp = await deleteAllRules({
+    //   data: [
+    //     {
+    //       id: 1426778339046535200,
+    //       tag: "cat pictures",
+    //     },
+    //   ],
+    // });
 
-		const rules = [
-			{
-				value: "covid",
-				// value: "dog has:images -is:retweet",
-				tag: "covid",
-				// tag: "dog pictures",
-			},
-		];
-		// ! setRules only needed once
-		const rulesResp = await setRules(rules);
-		console.log("🌟 ~ SET RULES", rulesResp);
-		console.log("🌟🚨 ~ returnnewPromise ~ rulesResp", rulesResp);
+    // const rules = [
+    //   {
+    //     value: "covid",
+    //     // value: "dog has:images -is:retweet",
+    //     tag: "covid",
+    //     // tag: "dog pictures",
+    //   },
+    // ];
+    // ! setRules only needed once
+    // const rulesResp = await setRules(rules);
+    // console.log("🌟 ~ SET RULES", rulesResp);
+    // console.log("🌟🚨 ~ returnnewPromise ~ rulesResp", rulesResp);
 
-		// !! specify rules to retrieve tweets mentioning "covid"
-		// * could rotate this topic daily for replay value!
-		// Identify and specify which fields you would like to retrieve
-		// If you would like to receive additional fields beyond id and text, you will have to specify those fields in your request with the field and/or expansion parameters.
-		// https://api.twitter.com/2/tweets/search/stream?tweet.fields=created_at&expansions=author_id&user.fields=created_at
+    // !! specify rules to retrieve tweets mentioning "covid"
+    // * could rotate this topic daily for replay value!
+    // Identify and specify which fields you would like to retrieve
+    // If you would like to receive additional fields beyond id and text, you will have to specify those fields in your request with the field and/or expansion parameters.
+    // https://api.twitter.com/2/tweets/search/stream?tweet.fields=created_at&expansions=author_id&user.fields=created_at
 
-		// const query =
-		//   "#nowplaying has:images -is:retweet (horrible OR worst OR sucks OR bad OR disappointing) (place_country:US OR place_country:MX OR place_country:CA) -happy -exciting -excited -favorite -fav -amazing -lovely -incredible";
+    // const query =
+    //   "#nowplaying has:images -is:retweet (horrible OR worst OR sucks OR bad OR disappointing) (place_country:US OR place_country:MX OR place_country:CA) -happy -exciting -excited -favorite -fav -amazing -lovely -incredible";
 
-		streamConnectStartFetching({ numTweets, resolve, reject, retryAttempt: 0 });
-	});
+    streamConnectStartFetching({ numTweets, resolve, reject, retryAttempt: 0 });
+  });
 }
 
 exports.getFilteredStreamV2Tweets = getFilteredStreamV2Tweets;
-const MAX_STREAMED_TWEETS = 10;
+const MAX_STREAMED_TWEETS = 50;
 
 function streamConnectStartFetching({
-	numTweets,
-	resolve,
-	reject,
-	retryAttempt,
+  numTweets,
+  resolve,
+  reject,
+  retryAttempt,
 }) {
-	const { stream, error, msUntilRateLimitReset } = getStream({ resolve });
-	console.log(
-		"🌟🚨 ~ file: getFilteredStreamV2Tweets.js ~ line 299 ~ stream",
-		stream
-	);
-	console.log("🌟🚨 ~ msUntilRateLimitReset", msUntilRateLimitReset);
-	if (error) {
-		console.log(
-			"🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 ~ streamConnectStartFetching ~ error",
-			error
-		);
-		resolve({ data: null, error, msUntilRateLimitReset });
-	}
-	const streamedTweets = [];
-	console.log("🌟 261 ~ returnnewPromise ~ streamedTweets = []");
+  const { stream, error, msUntilRateLimitReset } = getStream({ resolve });
+  console.log(
+    "🌟🚨 ~ file: getFilteredStreamV2Tweets.js ~ line 299 ~ Boolean(stream)",
+    Boolean(stream)
+  );
+  console.log("🌟🚨 ~ msUntilRateLimitReset", msUntilRateLimitReset);
+  if (error) {
+    console.log(
+      "🌟🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨 ~ streamConnectStartFetching ~ error",
+      error
+    );
+    resolve({ data: null, error, msUntilRateLimitReset });
+  }
+  const streamedTweets = [];
+  console.log("🌟 261 ~ returnnewPromise ~ streamedTweets = []");
 
-	stream.on("end", () => {
-		console.log("ADIOS 🌟 MUCHACHOS");
-	});
+  stream.on("end", () => {
+    console.log("ADIOS 🌟 MUCHACHOS");
+  });
 
-	stream.on("close", () => {
-		console.log("CLOSED 🌟 MUCHACHOS");
-	});
+  stream.on("close", () => {
+    console.log("CLOSED 🌟 MUCHACHOS");
+  });
 
-	stream
-		.on("data", (data) => {
-			try {
-				const json = JSON.parse(data);
-				console.log("🐦 tweet!", streamedTweets.length);
-				// console.log(json);
-				streamedTweets.push(json);
-				if (streamedTweets.length >= Math.min(MAX_STREAMED_TWEETS, numTweets)) {
-					console.log("destroying stream...💣");
-					// stop streaming
-					stream.end();
-					stream.close();
-					stream.destroy();
-					stream.request.abort();
+  stream
+    .on("data", (data) => {
+      try {
+        const json = JSON.parse(data);
+        console.log("🐦 tweet!", streamedTweets.length);
+        // console.log(json);
+        streamedTweets.push(json);
+        if (streamedTweets.length >= Math.min(MAX_STREAMED_TWEETS, numTweets)) {
+          console.log("destroying stream...💣");
+          // stop streaming
+          stream.end();
+          stream.destroy();
+          stream.request.abort();
 
-					const streamedTweetsData = streamedTweets.map(mapStreamedTweets);
-					console.log("done! stream destroyed ✔💣");
-					resolve({
-						data: streamedTweetsData,
-						error: null,
-						msUntilRateLimitReset,
-					});
-				}
-				// A successful connection resets retry count.
-			} catch (e) {
-				// // stop streaming
-				console.log("🌟 ~ .on ~ data.code", data.code);
-				console.log("🌟 ~ .on ~ data.title", data.title);
-				console.log("🌟 ~ .on ~ data.detail", data.detail);
-				stream.end();
-				stream.close();
-				stream.destroy();
-				stream.request.abort();
+          const streamedTweetsData = streamedTweets.map(mapStreamedTweets);
+          console.log("done! stream destroyed ✔💣");
+          resolve({
+            data: streamedTweetsData,
+            error: null,
+            msUntilRateLimitReset,
+          });
+        }
+        // A successful connection resets retry count.
+      } catch (e) {
+        // // stop streaming
+        console.log("🌟 ~ .on ~ data.code", data.code);
+        console.log("🌟 ~ .on ~ data.title", data.title);
+        console.log("🌟 ~ .on ~ data.detail", data.detail);
+        stream.end();
+        stream.destroy();
+        stream.request.abort();
 
-				if (
-					data.detail ===
-					"This stream is currently at the maximum allowed connection limit."
-				) {
-					stream.end();
-					stream.close();
-					stream.destroy();
-					stream.request.abort();
-					console.log("🌟🚨 ~ .on ~ retryAttempt", retryAttempt);
-					console.log(
-						`destroyed stream, reconnecting in ${Math.round(
-							2 ** retryAttempt / 1000
-						)} s 🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟`
-					);
-					resolve({ error: data, data: null, msUntilRateLimitReset });
-					// if (retryAttempt > 13) {
-					//   return;
-					// }
-					// setTimeout(() => {
-					//   console.warn("A connection error occurred. Reconnecting...");
-					//   streamConnectStartFetching({
-					//     numTweets,
-					//     resolve,
-					//     retryAttempt: ++retryAttempt,
-					//   });
-					// }, 2 ** retryAttempt);
-					// process.exit(1);
-				}
-			}
-		})
-		.on("err", (error) => {
-			stream.pause();
-			stream.end();
-			stream.close();
-			stream.destroy();
-			stream.request.abort();
-			resolve({ error, data: null, msUntilRateLimitReset });
-			console.log("error.code", error.code);
-			console.log("error.title", error.title);
-			if (error.code !== "ECONNRESET") {
-				process.exit(1);
-			} else {
-				// This reconnection logic will attempt to reconnect when a disconnection is detected.
-				// To avoid rate limits, this logic implements exponential backoff, so the wait time
-				// will increase if the client cannot reconnect to the stream.
-				setTimeout(() => {
-					console.warn("A connection error occurred. Reconnecting...");
-					streamConnectStartFetching({
-						numTweets,
-						resolve,
-						retryAttempt: ++retryAttempt,
-					});
-				}, 2 ** retryAttempt);
-			}
-		});
+        if (
+          data.detail ===
+          "This stream is currently at the maximum allowed connection limit."
+        ) {
+          stream.end();
+          stream.destroy();
+          stream.request.abort();
+          console.log("🌟🚨 ~ .on ~ retryAttempt", retryAttempt);
+          console.log(
+            `destroyed stream, reconnecting in ${Math.round(
+              2 ** retryAttempt / 1000
+            )} s 🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟`
+          );
+          resolve({ error: data, data: null, msUntilRateLimitReset });
+          // if (retryAttempt > 13) {
+          //   return;
+          // }
+          // setTimeout(() => {
+          //   console.warn("A connection error occurred. Reconnecting...");
+          //   streamConnectStartFetching({
+          //     numTweets,
+          //     resolve,
+          //     retryAttempt: ++retryAttempt,
+          //   });
+          // }, 2 ** retryAttempt);
+          // process.exit(1);
+        }
+      }
+    })
+    .on("err", (error) => {
+      stream.pause();
+      stream.end();
+      stream.destroy();
+      stream.request.abort();
+      resolve({ error, data: null, msUntilRateLimitReset });
+      console.log("error.code", error.code);
+      console.log("error.title", error.title);
+      if (error.code !== "ECONNRESET") {
+        process.exit(1);
+      } else {
+        // This reconnection logic will attempt to reconnect when a disconnection is detected.
+        // To avoid rate limits, this logic implements exponential backoff, so the wait time
+        // will increase if the client cannot reconnect to the stream.
+        setTimeout(() => {
+          console.warn("A connection error occurred. Reconnecting...");
+          streamConnectStartFetching({
+            numTweets,
+            resolve,
+            retryAttempt: ++retryAttempt,
+          });
+        }, 2 ** retryAttempt);
+      }
+    });
 }
 
 function mapStreamedTweets({ matching_rules, data: tweet, includes }) {
-	// * d.includes =>  The ID that represents the expanded data object will be included directly in the Tweet data object,
-	// * the expanded object metadata will be returned within the includes response object,
-	// * and will also include the ID so that you can match this data object to the original Tweet object.
-	const user = includes.users
-		? includes.users.find((user) => user.id === tweet.author_id)
-		: tweet.user;
-	const fullTweet = includes.tweets // replace truncated text with full text
-		? includes.tweets.find((t) => {
-				const isThisTweet = t.id === tweet.id;
-				const retweetedTweetMeta = tweet.referenced_tweets.find(
-					(rt) => rt.type === "retweeted"
-				);
-				const isRetweetedTweet =
-					retweetedTweetMeta && t.id === retweetedTweetMeta.id;
-				return isThisTweet || isRetweetedTweet;
-		  })
-		: {};
+  // * d.includes =>  The ID that represents the expanded data object will be included directly in the Tweet data object,
+  // * the expanded object metadata will be returned within the includes response object,
+  // * and will also include the ID so that you can match this data object to the original Tweet object.
+  const user = includes.users
+    ? includes.users.find((user) => user.id === tweet.author_id)
+    : tweet.user;
+  const fullTweet = includes.tweets // replace truncated text with full text
+    ? includes.tweets.find((t) => {
+        const isThisTweet = t.id === tweet.id;
+        const retweetedTweetMeta = tweet.referenced_tweets.find(
+          (rt) => rt.type === "retweeted"
+        );
+        const isRetweetedTweet =
+          retweetedTweetMeta && t.id === retweetedTweetMeta.id;
+        return isThisTweet || isRetweetedTweet;
+      })
+    : {};
 
-	if (fullTweet) {
-		console.log("🌟 ~ .on ~ fullTweet found!", fullTweet.id);
-	} else {
-		console.log("🌟 ~ not found...");
-		// console.log("🌟 ~ tweet", tweet);
-		// console.log("🌟 ~ .on ~ includes.tweets", includes.tweets);
-		// console.log(
-		//   "🌟 ~ .on ~ includes.tweets",
-		//   includes.tweets && includes.tweets.map((t) => t.id)
-		// );
-	}
+  if (fullTweet) {
+    console.log("🌟 ~ .on ~ fullTweet found!", fullTweet.id);
+  } else {
+    console.log("🌟 ~ not found...");
+    // console.log("🌟 ~ tweet", tweet);
+    // console.log("🌟 ~ .on ~ includes.tweets", includes.tweets);
+    // console.log(
+    //   "🌟 ~ .on ~ includes.tweets",
+    //   includes.tweets && includes.tweets.map((t) => t.id)
+    // );
+  }
 
-	// console.log("🌟 ~ .on ~ includes", Object.keys(includes));
-	// console.log(
-	//   "🌟 ~ .on ~ includes.tweets",
-	//   includes.tweets.map((t) => Object.keys(t))
-	//   );
-	// console.log("🌟 ~ .on ~ tweet.id", tweet.id);
-	return {
-		...tweet,
-		...fullTweet,
-		user,
-		includes,
-		matching_rules,
-	};
+  // console.log("🌟 ~ .on ~ includes", Object.keys(includes));
+  // console.log(
+  //   "🌟 ~ .on ~ includes.tweets",
+  //   includes.tweets.map((t) => Object.keys(t))
+  //   );
+  // console.log("🌟 ~ .on ~ tweet.id", tweet.id);
+  return {
+    ...tweet,
+    ...fullTweet,
+    user,
+    includes,
+    matching_rules,
+  };
 }

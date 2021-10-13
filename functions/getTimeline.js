@@ -1,6 +1,12 @@
 module.exports = getTimeline;
 const { T } = require("../utils");
 const uniqBy = require("lodash.uniqby");
+const fetch = require("node-fetch");
+const needle = require("needle");
+const {
+  getTwitterApiUrlQueryString,
+} = require("./getTwitterApiUrlQueryString");
+const token = process.env.TWITTER_BEARER_TOKEN;
 
 const MAX_ATTEMPTS = 10;
 
@@ -21,21 +27,51 @@ async function getTimeline({ userId, numTweets, screenName, filterFn, maxId }) {
     while (fetchedTweets.length < numTweets && attempts < MAX_ATTEMPTS) {
       attempts++;
 
-      const result = await T.get(`statuses/user_timeline`, {
-        ...(userId ? { user_id: userId } : {}),
-        ...(screenName ? { screen_name: screenName } : {}),
-        ...(max_id ? { max_id } : {}),
-        count: numTweets /*  - fetchedTweets.length */,
-        include_rts: true,
-        exclude_replies: false,
-      });
+      // const queryParams = [
+      //   { key: "tweet.fields", val: tweetFields.join(",") },
+      //   { key: "expansions", val: tweetExpansions.join(",") },
+      //   { key: "user.fields", val: userFields.join(",") },
+      //   { key: "media.fields", val: mediaFields.join(",") },
+      //   { key: "place.fields", val: placeFields.join(",") },
+      // ];
+      // const queryString = `?${queryParams
+      //   .map(({ key, val }) => `${key}=${val}`)
+      //   .join("&")}`;
+      const queryString = getTwitterApiUrlQueryString();
+      const timelineUrl = `https://api.twitter.com/2/users/${userId}/tweets${queryString}&max_results=${numTweets}`;
 
-      if (!result) {
+      const response = await needle("get", timelineUrl, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.body.errors) {
+        console.log(
+          "🌟🚨 ~ getTimeline ~ response.title,.detail",
+          response.title,
+          response.detail
+        );
+        console.log("🌟🚨 ~ getTimeline ~ response.body", response.body);
+        return [];
+      } else {
+        console.log("🌟🚨 ~ getTimeline ~ response", response);
+      }
+
+      // const result = await T.get(`statuses/user_timeline`, {
+      //   ...(userId ? { user_id: userId } : {}),
+      //   ...(screenName ? { screen_name: screenName } : {}),
+      //   ...(max_id ? { max_id } : {}),
+      //   count: numTweets /*  - fetchedTweets.length */,
+      //   include_rts: true,
+      //   exclude_replies: false,
+      // });
+
+      if (!response) {
         return [];
       }
 
       // on the next attempt, fetch tweets older than the oldest one we just fetched
-      max_id = result.data.reduce(
+      max_id = response.data.reduce(
         (acc, cur) => Math.min(acc, Number(cur.id_str)),
         Infinity
       );
@@ -43,7 +79,7 @@ async function getTimeline({ userId, numTweets, screenName, filterFn, maxId }) {
       fetchedTweets = uniqBy(
         [
           ...fetchedTweets,
-          ...result.data.filter(filterFn ? filterFn : () => true),
+          ...response.data.filter(filterFn ? filterFn : () => true),
         ],
         (t) => t.id_str
       );
