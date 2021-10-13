@@ -1,14 +1,14 @@
 // https://github.com/twitterdev/Twitter-API-v2-sample-code/blob/main/Filtered-Stream/filtered_stream.js
 const needle = require("needle");
 const {
-  getTwitterApiUrlQueryString,
+  getTwitterApiUrlQueryStringForStream,
 } = require("./getTwitterApiUrlQueryString");
 const token = process.env.TWITTER_BEARER_TOKEN;
 
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 // https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
 // https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/get-tweets-search-stream
-const queryString = getTwitterApiUrlQueryString();
+const queryString = getTwitterApiUrlQueryStringForStream();
 const streamURL = `https://api.twitter.com/2/tweets/search/stream${queryString}`;
 
 async function getAllRules() {

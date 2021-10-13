@@ -65,10 +65,18 @@ async function generateBotScore(tweetsByUser, res) {
     // * fetch ~50? tweets for user, then pass them into timeline here
     const TWEETS_TO_FETCH = 200;
     const timeline = await getTimeline({
-      userId: user.id_str,
+      userId: user.id_str || String(user.id),
       numTweets: TWEETS_TO_FETCH,
       screenName: user.screen_name,
     });
+
+    if (timeline.length === 0 || !Array.isArray(timeline)) {
+      console.log("🤡 no timeline!", timeline.length);
+      if (!Array.isArray(timeline)) {
+        console.log(timeline);
+      }
+      return;
+    }
 
     const options = {
       method: "POST",
