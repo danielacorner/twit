@@ -16,6 +16,3 @@ const FILE_PATH = process.argv[2] || "./tweets.json";
 const NUM_TWEETS = Number(process.argv[3]) || 10;
 
 generateNewTweetsDataset({ numTweets: NUM_TWEETS, filePath: FILE_PATH });
-
-// TODO: for each tweet in the dataset, append a bot score
-// generateBotScore({id:})

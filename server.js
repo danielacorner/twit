@@ -1,7 +1,6 @@
 const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
-const app = express();
 const path = require("path");
 const { FILTER_LEVEL, filterByMediaType } = require("./utils");
 const getTimeline = require("./functions/getTimeline");
@@ -34,12 +33,16 @@ const ALLOW_LIST = [
   "https://twitter-viz.netlify.app/",
   "http://localhost:3000",
   "http://localhost:3000/",
-]; /*
+];
+
+const app = express();
+
+/*
 app.use(
-  cors({
+	cors({
     origin: ALLOW_LIST,
   })
-); */
+	); */
 app.use(cors());
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -175,7 +178,7 @@ app.post("/api/save_bot_score_for_current_app_user", async function (req, res) {
 app.post("/api/generate_bot_score", async function (req, res) {
   const tweetsByUser = req.body;
 
-  const botScore = await generateBotScore(tweetsByUser);
+  const { data: botScore, error } = await generateBotScore(tweetsByUser);
 
   const {
     astroturf,
@@ -194,13 +197,18 @@ app.post("/api/generate_bot_score", async function (req, res) {
   // spammer: accounts labeled as spambots from several datasets
   // financial: bots that post using cashtags
   // other: miscellaneous other bots obtained from manual annotation, user feedback, etc.
-
+  if (error) {
+    res.json({
+      data: null,
+      error,
+    });
+  }
   // whenever we generate a bot score
   // send bot score to DB, so we can reliably display nodes with bot scores (botometer api limit)
   // https://docs.fauna.com/fauna/current/cookbook/?lang=javascript#collection-create-document
   sendBotScoreToDB({ ...tweetsByUser[0], botScore });
 
-  res.json(botScore);
+  res.json({ data: botScore });
 });
 
 app.get("/api/highscores", async function (req, res) {
