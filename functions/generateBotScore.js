@@ -54,17 +54,51 @@ const EMPTY_USER = {
   notifications: null,
 };
 
+const token = process.env.TWITTER_BEARER_TOKEN;
+
 async function generateBotScore(tweetsByUser, res) {
   return new Promise(async (resolve, reject) => {
     const user = tweetsByUser[0] && tweetsByUser[0].user;
-    console.log("🌟🚨 ~ generateBotScore ~ user", user);
+    console.log("🌟🚨 ~ returnnewPromise ~ user", user);
+    console.log("🌟🚨 ~ generateBotScore ~ user.username", user.username);
+    console.log("🌟🚨 ~ generateBotScore ~ user.description", user.description);
+
+    // ! need to grab the user from v1 api ?
+    const userV1 = await axios
+      .get(
+        `https://api.twitter.com/1.1/users/show?screen_name=${user.username}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .catch((err) => {
+        console.log("err!!!");
+        console.log("err!!!");
+        console.log("err!!!");
+        console.log("err!!!");
+        console.log("err!!!");
+        console.log("err!!!");
+        console.log("err!!!");
+        console.log("err!!!");
+        console.log("err!!!");
+        console.log("err!!!");
+        console.log(Object.keys(err));
+        console.log(Object.keys(err.response));
+        console.log("userv1 err", {
+          status: err.response.status,
+          statusText: err.response.statusText,
+        });
+      });
+    console.log("🌟🚨 ~~~~~~~~ generateBotScore ~ userV1", userV1);
 
     // * fetch ~50? tweets for user, then pass them into timeline here
     const TWEETS_TO_FETCH = 200;
     const timeline = await getTimeline({
       user,
       numTweets: TWEETS_TO_FETCH,
-      screenName: user.screen_name,
+      screenName: user.username,
       needsV1Api: true, //Botometer currently seems to only work with v1 Twitter API responses https://rapidapi.com/OSoMe/api/botometer-pro/details
     });
 
