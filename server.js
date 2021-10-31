@@ -181,6 +181,7 @@ app.post("/api/generate_bot_score", async function (req, res) {
   const { data: botScore, error } = await generateBotScore(tweetsByUser);
   if (!botScore) {
     console.log("🌟🚨 ~ !botScore", { botScore, error });
+    res.json({ data: null, error });
     return;
   }
   const {
