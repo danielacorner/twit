@@ -65,7 +65,10 @@ async function generateBotScore(tweetsByUser, res) {
       user,
       numTweets: TWEETS_TO_FETCH,
       screenName: user.screen_name,
+      needsV1Api: true, //Botometer currently seems to only work with v1 Twitter API responses https://rapidapi.com/OSoMe/api/botometer-pro/details
     });
+
+    console.log(`Received timeline... length ${timeline.length}`);
 
     if (timeline.length === 0 || !Array.isArray(timeline)) {
       console.log("🤡 no timeline!", timeline.length);
@@ -91,13 +94,21 @@ async function generateBotScore(tweetsByUser, res) {
       },
     };
     console.log(
-      "🌟🚨 ~ file: generateBotScore.js ~ line 95 ~ generateBotScore ~ timeline[0].user",
-      timeline[0] && timeline[0].user
+      "🌟🚨 ~ file: generateBotScore.js ~ line 95 ~ generateBotScore ~ timeline[0].user.username === ",
+      timeline[0] && timeline[0].user.username
+    );
+    console.log(
+      "🌟🚨 ~ file: generateBotScore.js ~ line 95 ~ generateBotScore ~ timeline[0].user.description === ",
+      timeline[0] && timeline[0].user.description
     );
 
     // https://botometer.osome.iu.edu/faq
     // https://rapidapi.com/OSoMe/api/botometer-pro/details
     // check usage at https://rapidapi.com/developer/dashboard
+
+    console.log(
+      `Submitting timeline for bot score... length ${timeline.length}`
+    );
 
     axios
       .request(options)

@@ -179,7 +179,10 @@ app.post("/api/generate_bot_score", async function (req, res) {
   const tweetsByUser = req.body;
 
   const { data: botScore, error } = await generateBotScore(tweetsByUser);
-
+  if (!botScore) {
+    console.log("🌟🚨 ~ !botScore", { botScore, error });
+    return;
+  }
   const {
     astroturf,
     fake_follower,
